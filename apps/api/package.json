@@ -2,23 +2,35 @@
   "name": "@portal/api",
   "version": "0.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "dev": "tsc-watch --project tsconfig.json --onSuccess \"node dist/main.js\"",
-    "build": "tsc -p tsconfig.json",
+    "dev": "prisma generate && tsc-watch --project tsconfig.json --onSuccess \"node dist/main.js\"",
+    "build": "prisma generate && tsc -p tsconfig.json",
     "start": "node dist/main.js",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
-    "lint": "eslint src"
+    "typecheck": "prisma generate && tsc -p tsconfig.json --noEmit && tsc -p tsconfig.tools.json --noEmit",
+    "db:validate": "prisma validate",
+    "db:migrate:dev": "prisma migrate dev",
+    "db:migrate:deploy": "prisma migrate deploy",
+    "db:status": "prisma migrate status",
+    "db:seed": "prisma db seed",
+    "db:seed:run": "prisma generate && tsc -p tsconfig.seed.json && node dist/prisma/seed.js",
+    "lint": "eslint src prisma/*.ts prisma.config.ts"
   },
   "dependencies": {
     "@nestjs/common": "12.1.1",
     "@nestjs/core": "12.1.1",
     "@nestjs/platform-express": "12.1.1",
+    "@prisma/adapter-pg": "7.9.1",
+    "@prisma/client": "7.9.1",
     "@portal/contracts": "workspace:*",
+    "argon2": "0.45.1",
+    "dotenv": "18.0.4",
     "reflect-metadata": "0.2.2",
     "rxjs": "7.8.2"
   },
   "devDependencies": {
     "@types/node": "22.19.15",
+    "prisma": "7.9.1",
     "tsc-watch": "7.2.0",
     "typescript": "5.9.3"
   }

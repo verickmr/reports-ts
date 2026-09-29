@@ -7,4 +7,5 @@ coverage/
 !.env.example
 *.tsbuildinfo
 *.log
+apps/api/src/generated/
 

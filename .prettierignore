@@ -2,4 +2,5 @@ node_modules/
 .turbo/
 dist/
 pnpm-lock.yaml
+apps/api/src/generated/
 

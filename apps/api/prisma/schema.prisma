@@ -1,0 +1,75 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  REQUESTER
+  AGENT
+}
+
+enum RequestStatus {
+  OPEN
+  IN_PROGRESS
+  COMPLETED
+}
+
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  username     String   @unique @db.VarChar(80)
+  name         String   @db.VarChar(120)
+  passwordHash String   @map("password_hash") @db.VarChar(255)
+  role         UserRole @default(REQUESTER)
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  requests Request[]
+  sessions Session[]
+
+  @@map("users")
+}
+
+model Category {
+  id       Int       @id @default(autoincrement())
+  slug     String    @unique @db.VarChar(40)
+  name     String    @db.VarChar(80)
+  requests Request[]
+
+  @@map("categories")
+}
+
+model Request {
+  id          Int           @id @default(autoincrement())
+  title       String        @db.VarChar(150)
+  description String        @db.Text
+  status      RequestStatus @default(OPEN)
+  categoryId  Int           @map("category_id")
+  requesterId String        @map("requester_id") @db.Uuid
+  createdAt   DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  category  Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  requester User     @relation(fields: [requesterId], references: [id], onDelete: Restrict)
+
+  @@index([requesterId, createdAt])
+  @@index([status, createdAt])
+  @@index([categoryId, createdAt])
+  @@map("requests")
+}
+
+model Session {
+  id        String   @id @default(uuid()) @db.Uuid
+  tokenHash String   @unique @map("token_hash") @db.Char(64)
+  userId    String   @map("user_id") @db.Uuid
+  expiresAt DateTime @map("expires_at") @db.Timestamptz(3)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("sessions")
+}
