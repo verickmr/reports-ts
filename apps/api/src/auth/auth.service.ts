@@ -47,7 +47,14 @@ export class AuthService {
       where: { tokenHash: hashToken(token) },
       include: { user: true },
     });
-    if (!session || session.expiresAt <= new Date()) return null;
+    const now = Date.now();
+    if (
+      !session ||
+      session.expiresAt.getTime() <= now ||
+      session.createdAt.getTime() + sessionDurationMs <= now
+    ) {
+      return null;
+    }
     return {
       id: session.user.id,
       username: session.user.username,

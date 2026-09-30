@@ -32,7 +32,7 @@ Abra http://localhost:5173 e entre com `solicitante` ou `atendente` usando a sen
 - `GET /api/auth/me`: devolve o usuário da sessão ativa; responde `401` sem sessão válida.
 - `POST /api/auth/logout`: revoga a sessão atual e remove o cookie.
 
-O token aleatório fica em cookie `HttpOnly`, `SameSite=Strict`, restrito a `/api`, com validade de sete dias. Apenas seu hash SHA-256 é salvo em `sessions`. Em produção, o cookie também recebe `Secure`, portanto a aplicação deve ser servida por HTTPS. Senhas são verificadas com Argon2id. O `SessionGuard` pode proteger os próximos endpoints de solicitações.
+O token aleatório fica em cookie `HttpOnly`, `SameSite=Strict`, restrito a `/api`, com validade de oito horas. Apenas seu hash SHA-256 é salvo em `sessions`. Em produção, o cookie também recebe `Secure`, portanto a aplicação deve ser servida por HTTPS. Senhas são verificadas com Argon2id. O `SessionGuard` pode proteger os próximos endpoints de solicitações.
 
 ## Verificações
 

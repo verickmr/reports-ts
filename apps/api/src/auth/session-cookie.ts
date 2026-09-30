@@ -1,5 +1,5 @@
 export const sessionCookieName = 'portal_session';
-export const sessionDurationMs = 7 * 24 * 60 * 60 * 1000;
+export const sessionDurationMs = 8 * 60 * 60 * 1000;
 
 export type CookieRequest = { headers: { cookie?: string } };
 export type CookieResponse = {
