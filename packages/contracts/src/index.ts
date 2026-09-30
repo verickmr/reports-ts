@@ -66,3 +66,21 @@ export const listedRequestSchema = createdRequestSchema
 
 export const listedRequestsSchema = z.array(listedRequestSchema);
 export type ListedRequests = z.infer<typeof listedRequestsSchema>;
+
+export const listRequestsQuerySchema = z
+  .strictObject({
+    title: z.string().trim().min(1).max(150).optional(),
+    categoryId: z.coerce.number().int().positive().optional(),
+    status: requestStatusSchema.optional(),
+    createdFrom: z.iso.datetime().optional(),
+    createdBefore: z.iso.datetime().optional(),
+  })
+  .refine(
+    ({ createdFrom, createdBefore }) =>
+      !createdFrom ||
+      !createdBefore ||
+      Date.parse(createdFrom) < Date.parse(createdBefore),
+    { path: ['createdBefore'], message: 'O fim deve ser após o início.' },
+  );
+
+export type ListRequestsQuery = z.infer<typeof listRequestsQuerySchema>;

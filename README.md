@@ -32,7 +32,7 @@ Abra http://localhost:5173 e entre com `solicitante` ou `atendente` usando a sen
 - `GET /api/auth/me`: devolve o usuário da sessão ativa; responde `401` sem sessão válida.
 - `POST /api/auth/logout`: revoga a sessão atual e remove o cookie.
 
-O token aleatório fica em cookie `HttpOnly`, `SameSite=Strict`, restrito a `/api`, com validade de oito horas. Apenas seu hash SHA-256 é salvo em `sessions`. Em produção, o cookie também recebe `Secure`, portanto a aplicação deve ser servida por HTTPS. Senhas são verificadas com Argon2id. O `SessionGuard` pode proteger os próximos endpoints de solicitações.
+O token aleatório fica em cookie `HttpOnly`, `SameSite=Strict`, restrito a `/api`, com validade de oito horas. Apenas seu hash SHA-256 é salvo em `sessions`. Em produção, o cookie também recebe `Secure`, portanto a aplicação deve ser servida por HTTPS. Senhas são verificadas com Argon2id. O `SessionGuard` protege as rotas de categorias e solicitações.
 
 ## Categorias
 
@@ -43,6 +43,8 @@ O token aleatório fica em cookie `HttpOnly`, `SameSite=Strict`, restrito a `/ap
 `POST /api/requests` cria uma solicitação autenticada com `title`, `description` e `categoryId`. A API valida a categoria, usa o usuário da sessão como solicitante e deixa o banco atribuir o código, a data de abertura e o status inicial `OPEN`. O retorno contém esses dados e responde `201`.
 
 `GET /api/requests` lista as solicitações para usuários autenticados, da mais recente para a mais antiga, com código, título, categoria, solicitante, data de abertura e status.
+
+Filtros opcionais em `GET /api/requests`: `title` (busca parcial sem diferenciar maiúsculas), `categoryId`, `status`, `createdFrom` (início inclusivo) e `createdBefore` (fim exclusivo). As datas usam ISO 8601 em UTC, por exemplo `2026-09-30T00:00:00.000Z`.
 
 ## Verificações
 

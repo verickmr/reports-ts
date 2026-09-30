@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import type {
   CreateRequestInput,
   CreatedRequest,
+  ListRequestsQuery,
   ListedRequests,
 } from '@portal/contracts';
 import { PrismaService } from '../database/prisma.service.js';
@@ -10,8 +11,26 @@ import { PrismaService } from '../database/prisma.service.js';
 export class RequestsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async list(): Promise<ListedRequests> {
+  async list(filters: ListRequestsQuery): Promise<ListedRequests> {
     const requests = await this.prisma.request.findMany({
+      where: {
+        title: filters.title
+          ? { contains: filters.title, mode: 'insensitive' }
+          : undefined,
+        categoryId: filters.categoryId,
+        status: filters.status,
+        createdAt:
+          filters.createdFrom || filters.createdBefore
+            ? {
+                gte: filters.createdFrom
+                  ? new Date(filters.createdFrom)
+                  : undefined,
+                lt: filters.createdBefore
+                  ? new Date(filters.createdBefore)
+                  : undefined,
+              }
+            : undefined,
+      },
       select: {
         id: true,
         title: true,

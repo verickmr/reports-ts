@@ -4,11 +4,13 @@ import {
   Controller,
   Get,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
 import {
   createRequestInputSchema,
+  listRequestsQuerySchema,
   type CreatedRequest,
   type ListedRequests,
 } from '@portal/contracts';
@@ -21,8 +23,12 @@ export class RequestsController {
   constructor(private readonly requests: RequestsService) {}
 
   @Get()
-  list(): Promise<ListedRequests> {
-    return this.requests.list();
+  list(@Query() query: unknown): Promise<ListedRequests> {
+    const parsed = listRequestsQuerySchema.safeParse(query);
+    if (!parsed.success) {
+      throw new BadRequestException('Filtros inválidos.');
+    }
+    return this.requests.list(parsed.data);
   }
 
   @Post()
