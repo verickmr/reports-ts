@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Get,
   Post,
   Req,
   UseGuards,
@@ -9,6 +10,7 @@ import {
 import {
   createRequestInputSchema,
   type CreatedRequest,
+  type ListedRequests,
 } from '@portal/contracts';
 import { AuthenticatedRequest, SessionGuard } from '../auth/session.guard.js';
 import { RequestsService } from './requests.service.js';
@@ -17,6 +19,11 @@ import { RequestsService } from './requests.service.js';
 @UseGuards(SessionGuard)
 export class RequestsController {
   constructor(private readonly requests: RequestsService) {}
+
+  @Get()
+  list(): Promise<ListedRequests> {
+    return this.requests.list();
+  }
 
   @Post()
   async create(

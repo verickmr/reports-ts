@@ -1,10 +1,33 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import type { CreateRequestInput, CreatedRequest } from '@portal/contracts';
+import type {
+  CreateRequestInput,
+  CreatedRequest,
+  ListedRequests,
+} from '@portal/contracts';
 import { PrismaService } from '../database/prisma.service.js';
 
 @Injectable()
 export class RequestsService {
   constructor(private readonly prisma: PrismaService) {}
+
+  async list(): Promise<ListedRequests> {
+    const requests = await this.prisma.request.findMany({
+      select: {
+        id: true,
+        title: true,
+        status: true,
+        createdAt: true,
+        category: { select: { id: true, name: true } },
+        requester: { select: { id: true, name: true } },
+      },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+    });
+
+    return requests.map((request) => ({
+      ...request,
+      createdAt: request.createdAt.toISOString(),
+    }));
+  }
 
   async create(
     input: CreateRequestInput,
