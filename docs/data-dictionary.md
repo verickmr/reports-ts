@@ -52,3 +52,17 @@ As duas chaves estrangeiras restringem a exclusão de usuários e categorias com
 | `created_at` | TIMESTAMPTZ(3) | Data de criação.                                                        |
 
 Índices em `user_id` e `expires_at` apoiam consulta e limpeza de sessões. O token em texto não é persistido no banco; `token_hash` guarda seu SHA-256. A API rejeita sessões após `expires_at` e remove a sessão no logout.
+
+## `google_auth_attempts`
+
+| Coluna          | Tipo                | Regra                                                         |
+| --------------- | ------------------- | ------------------------------------------------------------- |
+| `state_hash`    | CHAR(64)            | Chave primária; hash do `state` enviado ao Google.            |
+| `purpose`       | `GoogleAuthPurpose` | `LINK` vincula uma conta; `LOGIN` inicia uma sessão.          |
+| `session_id`    | UUID                | Sessão existente obrigatória para `LINK`; nula para `LOGIN`.  |
+| `code_verifier` | VARCHAR(128)        | Verificador PKCE temporário, usado apenas na troca do código. |
+| `nonce`         | VARCHAR(64)         | Valor aleatório usado na validação da resposta de identidade. |
+| `expires_at`    | TIMESTAMPTZ(3)      | Prazo curto da tentativa, validado na API.                    |
+| `created_at`    | TIMESTAMPTZ(3)      | Data de criação.                                              |
+
+Uma tentativa de vínculo depende da sessão local e é removida se essa sessão for encerrada. A migração impede `LINK` sem sessão e `LOGIN` com sessão. O retorno do Google deverá consumir a tentativa uma única vez e rejeitar tentativas expiradas.

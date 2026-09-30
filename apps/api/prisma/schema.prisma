@@ -18,6 +18,11 @@ enum RequestStatus {
   COMPLETED
 }
 
+enum GoogleAuthPurpose {
+  LINK
+  LOGIN
+}
+
 model User {
   id           String   @id @default(uuid()) @db.Uuid
   username     String   @unique @db.VarChar(80)
@@ -68,9 +73,26 @@ model Session {
   expiresAt DateTime @map("expires_at") @db.Timestamptz(3)
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  googleAuthAttempts GoogleAuthAttempt[]
 
   @@index([userId])
   @@index([expiresAt])
   @@map("sessions")
+}
+
+model GoogleAuthAttempt {
+  stateHash    String            @id @map("state_hash") @db.Char(64)
+  purpose      GoogleAuthPurpose
+  sessionId    String?           @map("session_id") @db.Uuid
+  codeVerifier String            @map("code_verifier") @db.VarChar(128)
+  nonce        String            @db.VarChar(64)
+  expiresAt    DateTime          @map("expires_at") @db.Timestamptz(3)
+  createdAt    DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  session Session? @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@index([expiresAt])
+  @@map("google_auth_attempts")
 }
