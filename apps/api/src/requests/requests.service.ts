@@ -1,9 +1,14 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import type {
   CreateRequestInput,
   CreatedRequest,
   ListRequestsQuery,
   ListedRequests,
+  RequestDetail,
 } from '@portal/contracts';
 import { PrismaService } from '../database/prisma.service.js';
 
@@ -46,6 +51,29 @@ export class RequestsService {
       ...request,
       createdAt: request.createdAt.toISOString(),
     }));
+  }
+
+  async detail(id: number): Promise<RequestDetail> {
+    const request = await this.prisma.request.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        status: true,
+        createdAt: true,
+        updatedAt: true,
+        category: { select: { id: true, name: true } },
+        requester: { select: { id: true, name: true } },
+      },
+    });
+    if (!request) throw new NotFoundException('Solicitação não encontrada.');
+
+    return {
+      ...request,
+      createdAt: request.createdAt.toISOString(),
+      updatedAt: request.updatedAt.toISOString(),
+    };
   }
 
   async create(

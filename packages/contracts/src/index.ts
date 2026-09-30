@@ -84,3 +84,16 @@ export const listRequestsQuerySchema = z
   );
 
 export type ListRequestsQuery = z.infer<typeof listRequestsQuerySchema>;
+
+export const requestIdSchema = z
+  .string()
+  .regex(/^[1-9]\d*$/)
+  .transform(Number)
+  .pipe(z.number().int().positive());
+
+export const requestDetailSchema = listedRequestSchema.extend({
+  description: z.string(),
+  updatedAt: z.iso.datetime(),
+});
+
+export type RequestDetail = z.infer<typeof requestDetailSchema>;

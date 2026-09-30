@@ -46,6 +46,8 @@ O token aleatório fica em cookie `HttpOnly`, `SameSite=Strict`, restrito a `/ap
 
 Filtros opcionais em `GET /api/requests`: `title` (busca parcial sem diferenciar maiúsculas), `categoryId`, `status`, `createdFrom` (início inclusivo) e `createdBefore` (fim exclusivo). As datas usam ISO 8601 em UTC, por exemplo `2026-09-30T00:00:00.000Z`.
 
+`GET /api/requests/:id` mostra os detalhes da solicitação, incluindo descrição e última atualização. Um código inválido responde `400`; uma solicitação inexistente responde `404`.
+
 ## Verificações
 
 ```sh

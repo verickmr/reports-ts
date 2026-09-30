@@ -3,6 +3,7 @@ import {
   Body,
   Controller,
   Get,
+  Param,
   Post,
   Query,
   Req,
@@ -11,8 +12,10 @@ import {
 import {
   createRequestInputSchema,
   listRequestsQuerySchema,
+  requestIdSchema,
   type CreatedRequest,
   type ListedRequests,
+  type RequestDetail,
 } from '@portal/contracts';
 import { AuthenticatedRequest, SessionGuard } from '../auth/session.guard.js';
 import { RequestsService } from './requests.service.js';
@@ -29,6 +32,15 @@ export class RequestsController {
       throw new BadRequestException('Filtros inválidos.');
     }
     return this.requests.list(parsed.data);
+  }
+
+  @Get(':id')
+  detail(@Param('id') id: string): Promise<RequestDetail> {
+    const parsed = requestIdSchema.safeParse(id);
+    if (!parsed.success) {
+      throw new BadRequestException('Código da solicitação inválido.');
+    }
+    return this.requests.detail(parsed.data);
   }
 
   @Post()
