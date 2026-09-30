@@ -1,7 +1,12 @@
 import { Module } from '@nestjs/common';
 import { HealthController } from './health.controller.js';
+import { AuthController } from './auth/auth.controller.js';
+import { AuthService } from './auth/auth.service.js';
+import { SessionGuard } from './auth/session.guard.js';
+import { PrismaService } from './database/prisma.service.js';
 
 @Module({
-  controllers: [HealthController],
+  controllers: [HealthController, AuthController],
+  providers: [PrismaService, AuthService, SessionGuard],
 })
 export class AppModule {}

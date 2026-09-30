@@ -7,6 +7,25 @@ body {
   min-height: 100vh;
 }
 
+.centered {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.login-card {
+  width: min(100%, 420px);
+}
+
+.form-alert {
+  margin-bottom: 16px;
+}
+
+.status-card {
+  margin-top: 32px;
+}
+
 .content {
   width: min(100%, 960px);
   margin: 0 auto;
