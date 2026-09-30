@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import {
   categoriesResponseSchema,
   type CreateRequestInput,
@@ -15,6 +15,7 @@ import {
   Typography,
 } from 'antd';
 import { Link } from 'react-router-dom';
+import { createRequest } from '../requests/requests.api';
 
 async function fetchCategories() {
   const response = await fetch('/api/categories');
@@ -23,9 +24,14 @@ async function fetchCategories() {
 }
 
 export function CreateRequestPage() {
+  const [form] = Form.useForm<CreateRequestInput>();
   const categories = useQuery({
     queryKey: ['categories'],
     queryFn: fetchCategories,
+  });
+  const creation = useMutation({
+    mutationFn: createRequest,
+    onSuccess: () => form.resetFields(),
   });
 
   return (
@@ -54,18 +60,47 @@ export function CreateRequestPage() {
                 }
               />
             )}
-            <Form<CreateRequestInput> layout="vertical">
+            {creation.isSuccess && (
+              <Alert
+                type="success"
+                showIcon
+                message={`Solicitação #${creation.data.id} criada com sucesso.`}
+                className="form-alert"
+              />
+            )}
+            {creation.isError && (
+              <Alert
+                type="error"
+                showIcon
+                message={creation.error.message}
+                className="form-alert"
+              />
+            )}
+            <Form<CreateRequestInput>
+              form={form}
+              layout="vertical"
+              onFinish={(values) => creation.mutate(values)}
+            >
               <Form.Item
                 label="Título"
                 name="title"
-                rules={[{ required: true, message: 'Informe o título.' }]}
+                rules={[
+                  { required: true, message: 'Informe o título.' },
+                  { whitespace: true, message: 'Informe um título válido.' },
+                ]}
               >
                 <Input maxLength={150} />
               </Form.Item>
               <Form.Item
                 label="Descrição"
                 name="description"
-                rules={[{ required: true, message: 'Informe a descrição.' }]}
+                rules={[
+                  { required: true, message: 'Informe a descrição.' },
+                  {
+                    whitespace: true,
+                    message: 'Informe uma descrição válida.',
+                  },
+                ]}
               >
                 <Input.TextArea rows={5} />
               </Form.Item>
@@ -86,7 +121,12 @@ export function CreateRequestPage() {
                   }))}
                 />
               </Form.Item>
-              <Button type="primary" disabled>
+              <Button
+                type="primary"
+                htmlType="submit"
+                loading={creation.isPending}
+                disabled={!categories.isSuccess}
+              >
                 Criar solicitação
               </Button>
             </Form>
