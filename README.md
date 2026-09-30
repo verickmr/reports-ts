@@ -34,6 +34,10 @@ Abra http://localhost:5173 e entre com `solicitante` ou `atendente` usando a sen
 
 O token aleatório fica em cookie `HttpOnly`, `SameSite=Strict`, restrito a `/api`, com validade de oito horas. Apenas seu hash SHA-256 é salvo em `sessions`. Em produção, o cookie também recebe `Secure`, portanto a aplicação deve ser servida por HTTPS. Senhas são verificadas com Argon2id. O `SessionGuard` pode proteger os próximos endpoints de solicitações.
 
+## Categorias
+
+`GET /api/categories` lista as categorias em ordem alfabética para usuários autenticados. Ele retorna `id`, `slug` e `name` conforme o contrato compartilhado em `packages/contracts`.
+
 ## Verificações
 
 ```sh
@@ -52,7 +56,7 @@ pnpm --filter @portal/api db:status
 - `packages/contracts`: esquemas Zod e tipos compartilhados.
 - `docs`: [dicionário de dados](docs/data-dictionary.md) e documentação técnica adicionada conforme o projeto avança.
 
-O script de criação SQL está na migration inicial. As funcionalidades de solicitações entram no próximo marco.
+O script de criação SQL está na migration inicial. O cadastro e acompanhamento das solicitações entram nos próximos incrementos.
 
 ## Histórico de desenvolvimento
 

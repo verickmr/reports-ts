@@ -24,3 +24,14 @@ export const authResponseSchema = z.object({ user: authUserSchema });
 export type LoginInput = z.infer<typeof loginInputSchema>;
 export type AuthUser = z.infer<typeof authUserSchema>;
 export type AuthResponse = z.infer<typeof authResponseSchema>;
+
+export const categorySchema = z.object({
+  id: z.number().int().positive(),
+  slug: z.string(),
+  name: z.string(),
+});
+
+export const categoriesResponseSchema = z.array(categorySchema);
+
+export type Category = z.infer<typeof categorySchema>;
+export type CategoriesResponse = z.infer<typeof categoriesResponseSchema>;
