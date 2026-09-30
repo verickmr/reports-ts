@@ -1,14 +1,24 @@
 import {
   createdRequestSchema,
   createRequestInputSchema,
+  listRequestsQuerySchema,
   listedRequestsSchema,
   type CreatedRequest,
   type CreateRequestInput,
+  type ListRequestsQuery,
   type ListedRequests,
 } from '@portal/contracts';
 
-export async function listRequests(): Promise<ListedRequests> {
-  const response = await fetch('/api/requests');
+export async function listRequests(
+  filters: ListRequestsQuery = {},
+): Promise<ListedRequests> {
+  const query = listRequestsQuerySchema.parse(filters);
+  const params = new URLSearchParams();
+  for (const [name, value] of Object.entries(query)) {
+    if (value !== undefined) params.set(name, String(value));
+  }
+  const search = params.toString();
+  const response = await fetch(`/api/requests${search ? `?${search}` : ''}`);
   if (response.status === 401) {
     throw new Error('Sua sessão expirou. Atualize a página e entre novamente.');
   }

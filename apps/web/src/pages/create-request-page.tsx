@@ -1,8 +1,5 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
-import {
-  categoriesResponseSchema,
-  type CreateRequestInput,
-} from '@portal/contracts';
+import type { CreateRequestInput } from '@portal/contracts';
 import {
   Alert,
   Button,
@@ -15,19 +12,17 @@ import {
   Typography,
 } from 'antd';
 import { Link } from 'react-router-dom';
+import {
+  categoriesQueryKey,
+  listCategories,
+} from '../categories/categories.api';
 import { createRequest } from '../requests/requests.api';
-
-async function fetchCategories() {
-  const response = await fetch('/api/categories');
-  if (!response.ok) throw new Error('Não foi possível carregar as categorias.');
-  return categoriesResponseSchema.parse(await response.json());
-}
 
 export function CreateRequestPage() {
   const [form] = Form.useForm<CreateRequestInput>();
   const categories = useQuery({
-    queryKey: ['categories'],
-    queryFn: fetchCategories,
+    queryKey: categoriesQueryKey,
+    queryFn: listCategories,
   });
   const creation = useMutation({
     mutationFn: createRequest,

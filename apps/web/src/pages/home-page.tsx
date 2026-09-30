@@ -2,8 +2,13 @@ import {
   Alert,
   Button,
   Card,
+  Col,
   Flex,
+  Form,
+  Input,
   Layout,
+  Row,
+  Select,
   Space,
   Switch,
   Table,
@@ -12,14 +17,40 @@ import {
   type TableColumnsType,
 } from 'antd';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { healthResponseSchema, type ListedRequests } from '@portal/contracts';
+import {
+  healthResponseSchema,
+  type ListedRequests,
+  type ListRequestsQuery,
+} from '@portal/contracts';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { logout, sessionQueryKey } from '../auth/auth.api';
 import { useSession } from '../auth/use-session';
+import {
+  categoriesQueryKey,
+  listCategories,
+} from '../categories/categories.api';
 import { listRequests } from '../requests/requests.api';
 import { useViewPreferences } from '../state/view-preferences';
 
 type ListedRequest = ListedRequests[number];
+type RequestFilterForm = {
+  title?: string;
+  categoryId?: number;
+  status?: ListRequestsQuery['status'];
+  fromDate?: string;
+  toDate?: string;
+};
+
+function localDayStart(date: string): Date {
+  return new Date(`${date}T00:00:00`);
+}
+
+function nextLocalDayStart(date: string): Date {
+  const next = localDayStart(date);
+  next.setDate(next.getDate() + 1);
+  return next;
+}
 
 const statusLabels: Record<ListedRequest['status'], string> = {
   OPEN: 'Aberta',
@@ -64,6 +95,8 @@ async function fetchHealth() {
 }
 
 export function HomePage() {
+  const [filterForm] = Form.useForm<RequestFilterForm>();
+  const [filters, setFilters] = useState<ListRequestsQuery>({});
   const navigate = useNavigate();
   const compact = useViewPreferences((state) => state.compact);
   const setCompact = useViewPreferences((state) => state.setCompact);
@@ -78,11 +111,38 @@ export function HomePage() {
     queryFn: fetchHealth,
     retry: false,
   });
+  const categories = useQuery({
+    queryKey: categoriesQueryKey,
+    queryFn: listCategories,
+  });
   const requests = useQuery({
-    queryKey: ['requests'],
-    queryFn: listRequests,
+    queryKey: ['requests', filters],
+    queryFn: () => listRequests(filters),
     retry: false,
   });
+
+  function applyFilters(values: RequestFilterForm) {
+    if (values.fromDate && values.toDate && values.fromDate > values.toDate) {
+      filterForm.setFields([
+        {
+          name: 'toDate',
+          errors: ['A data final deve ser igual ou posterior à inicial.'],
+        },
+      ]);
+      return;
+    }
+    setFilters({
+      title: values.title?.trim() || undefined,
+      categoryId: values.categoryId,
+      status: values.status,
+      createdFrom: values.fromDate
+        ? localDayStart(values.fromDate).toISOString()
+        : undefined,
+      createdBefore: values.toDate
+        ? nextLocalDayStart(values.toDate).toISOString()
+        : undefined,
+    });
+  }
 
   return (
     <Layout className="page">
@@ -127,6 +187,87 @@ export function HomePage() {
           />
         )}
         <Card title="Solicitações" className="requests-card">
+          {categories.isError && (
+            <Alert
+              type="error"
+              showIcon
+              message={categories.error.message}
+              className="form-alert"
+              action={
+                <Button onClick={() => void categories.refetch()}>
+                  Tentar novamente
+                </Button>
+              }
+            />
+          )}
+          <Form<RequestFilterForm>
+            form={filterForm}
+            layout="vertical"
+            onFinish={applyFilters}
+          >
+            <Row gutter={16}>
+              <Col xs={24} md={8}>
+                <Form.Item label="Título" name="title">
+                  <Input placeholder="Buscar pelo título" maxLength={150} />
+                </Form.Item>
+              </Col>
+              <Col xs={24} md={8}>
+                <Form.Item label="Categoria" name="categoryId">
+                  <Select
+                    allowClear
+                    placeholder="Todas"
+                    loading={categories.isPending}
+                    disabled={!categories.isSuccess}
+                    options={categories.data?.map((category) => ({
+                      value: category.id,
+                      label: category.name,
+                    }))}
+                  />
+                </Form.Item>
+              </Col>
+              <Col xs={24} md={8}>
+                <Form.Item label="Status" name="status">
+                  <Select
+                    allowClear
+                    placeholder="Todos"
+                    options={Object.entries(statusLabels).map(
+                      ([value, label]) => ({
+                        value,
+                        label,
+                      }),
+                    )}
+                  />
+                </Form.Item>
+              </Col>
+              <Col xs={24} md={8}>
+                <Form.Item label="Abertura de" name="fromDate">
+                  <Input type="date" />
+                </Form.Item>
+              </Col>
+              <Col xs={24} md={8}>
+                <Form.Item label="Abertura até" name="toDate">
+                  <Input type="date" />
+                </Form.Item>
+              </Col>
+              <Col xs={24} md={8}>
+                <Form.Item label=" ">
+                  <Space>
+                    <Button type="primary" htmlType="submit">
+                      Aplicar filtros
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        filterForm.resetFields();
+                        setFilters({});
+                      }}
+                    >
+                      Limpar
+                    </Button>
+                  </Space>
+                </Form.Item>
+              </Col>
+            </Row>
+          </Form>
           {requests.isError ? (
             <Alert
               type="error"
