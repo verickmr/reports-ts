@@ -4,14 +4,17 @@ O banco usa PostgreSQL 16. A migration inicial está em `apps/api/prisma/migrati
 
 ## `users`
 
-| Coluna          | Tipo           | Regra                                           |
-| --------------- | -------------- | ----------------------------------------------- |
-| `id`            | UUID           | Chave primária; gerada pela aplicação.          |
-| `username`      | VARCHAR(80)    | Obrigatório e único; usado no login.            |
-| `name`          | VARCHAR(120)   | Nome de exibição obrigatório.                   |
-| `password_hash` | VARCHAR(255)   | Hash Argon2id; nunca armazena a senha em texto. |
-| `role`          | `UserRole`     | `REQUESTER` ou `AGENT`; padrão `REQUESTER`.     |
-| `created_at`    | TIMESTAMPTZ(3) | Preenchido ao criar o usuário.                  |
+| Coluna          | Tipo           | Regra                                                  |
+| --------------- | -------------- | ------------------------------------------------------ |
+| `id`            | UUID           | Chave primária; gerada pela aplicação.                 |
+| `username`      | VARCHAR(80)    | Obrigatório e único; usado no login.                   |
+| `name`          | VARCHAR(120)   | Nome de exibição obrigatório.                          |
+| `password_hash` | VARCHAR(255)   | Hash Argon2id; nunca armazena a senha em texto.        |
+| `google_sub`    | VARCHAR(255)   | Opcional e único; identifica a conta Google vinculada. |
+| `role`          | `UserRole`     | `REQUESTER` ou `AGENT`; padrão `REQUESTER`.            |
+| `created_at`    | TIMESTAMPTZ(3) | Preenchido ao criar o usuário.                         |
+
+O vínculo com Google usa o `sub` da identidade verificada. Ele só poderá ser associado a um usuário já cadastrado; não haverá criação automática de contas por este fluxo.
 
 ## `categories`
 
