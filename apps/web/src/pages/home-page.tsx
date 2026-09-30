@@ -6,14 +6,56 @@ import {
   Layout,
   Space,
   Switch,
+  Table,
+  Tag,
   Typography,
+  type TableColumnsType,
 } from 'antd';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { healthResponseSchema } from '@portal/contracts';
+import { healthResponseSchema, type ListedRequests } from '@portal/contracts';
 import { useNavigate } from 'react-router-dom';
 import { logout, sessionQueryKey } from '../auth/auth.api';
 import { useSession } from '../auth/use-session';
+import { listRequests } from '../requests/requests.api';
 import { useViewPreferences } from '../state/view-preferences';
+
+type ListedRequest = ListedRequests[number];
+
+const statusLabels: Record<ListedRequest['status'], string> = {
+  OPEN: 'Aberta',
+  IN_PROGRESS: 'Em andamento',
+  COMPLETED: 'Concluída',
+};
+
+const statusColors: Record<ListedRequest['status'], string> = {
+  OPEN: 'blue',
+  IN_PROGRESS: 'gold',
+  COMPLETED: 'green',
+};
+
+const dateFormatter = new Intl.DateTimeFormat('pt-BR', {
+  dateStyle: 'short',
+  timeStyle: 'short',
+});
+
+const columns: TableColumnsType<ListedRequest> = [
+  { title: 'Código', dataIndex: 'id', render: (id: number) => `#${id}` },
+  { title: 'Título', dataIndex: 'title' },
+  { title: 'Categoria', dataIndex: ['category', 'name'] },
+  { title: 'Solicitante', dataIndex: ['requester', 'name'] },
+  {
+    title: 'Abertura',
+    dataIndex: 'createdAt',
+    render: (createdAt: string) => dateFormatter.format(new Date(createdAt)),
+  },
+  {
+    title: 'Status',
+    dataIndex: 'status',
+    render: (status: ListedRequest['status']) => (
+      <Tag color={statusColors[status]}>{statusLabels[status]}</Tag>
+    ),
+  },
+];
 
 async function fetchHealth() {
   const response = await fetch('/api/health');
@@ -34,6 +76,11 @@ export function HomePage() {
   const health = useQuery({
     queryKey: ['health'],
     queryFn: fetchHealth,
+    retry: false,
+  });
+  const requests = useQuery({
+    queryKey: ['requests'],
+    queryFn: listRequests,
     retry: false,
   });
 
@@ -79,6 +126,30 @@ export function HomePage() {
             className="form-alert"
           />
         )}
+        <Card title="Solicitações" className="requests-card">
+          {requests.isError ? (
+            <Alert
+              type="error"
+              showIcon
+              message={requests.error.message}
+              action={
+                <Button onClick={() => void requests.refetch()}>
+                  Tentar novamente
+                </Button>
+              }
+            />
+          ) : (
+            <Table<ListedRequest>
+              rowKey="id"
+              columns={columns}
+              dataSource={requests.data ?? []}
+              loading={requests.isPending}
+              locale={{ emptyText: 'Nenhuma solicitação cadastrada.' }}
+              pagination={{ pageSize: 10 }}
+              scroll={{ x: 740 }}
+            />
+          )}
+        </Card>
         <Card
           title="Conexão com a API"
           loading={health.isPending}

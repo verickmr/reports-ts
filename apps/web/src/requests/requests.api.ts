@@ -1,9 +1,22 @@
 import {
   createdRequestSchema,
   createRequestInputSchema,
+  listedRequestsSchema,
   type CreatedRequest,
   type CreateRequestInput,
+  type ListedRequests,
 } from '@portal/contracts';
+
+export async function listRequests(): Promise<ListedRequests> {
+  const response = await fetch('/api/requests');
+  if (response.status === 401) {
+    throw new Error('Sua sessão expirou. Atualize a página e entre novamente.');
+  }
+  if (!response.ok) {
+    throw new Error('Não foi possível carregar as solicitações.');
+  }
+  return listedRequestsSchema.parse(await response.json());
+}
 
 export async function createRequest(
   input: CreateRequestInput,
