@@ -35,3 +35,24 @@ export const categoriesResponseSchema = z.array(categorySchema);
 
 export type Category = z.infer<typeof categorySchema>;
 export type CategoriesResponse = z.infer<typeof categoriesResponseSchema>;
+
+export const createRequestInputSchema = z.strictObject({
+  title: z.string().trim().min(1).max(150),
+  description: z.string().trim().min(1),
+  categoryId: z.number().int().positive(),
+});
+
+export const requestStatusSchema = z.enum(['OPEN', 'IN_PROGRESS', 'COMPLETED']);
+
+export const createdRequestSchema = z.object({
+  id: z.number().int().positive(),
+  title: z.string(),
+  description: z.string(),
+  categoryId: z.number().int().positive(),
+  requesterId: z.uuid(),
+  status: requestStatusSchema,
+  createdAt: z.iso.datetime(),
+});
+
+export type CreateRequestInput = z.infer<typeof createRequestInputSchema>;
+export type CreatedRequest = z.infer<typeof createdRequestSchema>;

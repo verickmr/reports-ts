@@ -5,9 +5,16 @@ import { AuthService } from './auth/auth.service.js';
 import { SessionGuard } from './auth/session.guard.js';
 import { CategoriesController } from './categories/categories.controller.js';
 import { PrismaService } from './database/prisma.service.js';
+import { RequestsController } from './requests/requests.controller.js';
+import { RequestsService } from './requests/requests.service.js';
 
 @Module({
-  controllers: [HealthController, AuthController, CategoriesController],
-  providers: [PrismaService, AuthService, SessionGuard],
+  controllers: [
+    HealthController,
+    AuthController,
+    CategoriesController,
+    RequestsController,
+  ],
+  providers: [PrismaService, AuthService, SessionGuard, RequestsService],
 })
 export class AppModule {}

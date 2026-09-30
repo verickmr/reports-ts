@@ -38,6 +38,10 @@ O token aleatório fica em cookie `HttpOnly`, `SameSite=Strict`, restrito a `/ap
 
 `GET /api/categories` lista as categorias em ordem alfabética para usuários autenticados. Ele retorna `id`, `slug` e `name` conforme o contrato compartilhado em `packages/contracts`.
 
+## Solicitações
+
+`POST /api/requests` cria uma solicitação autenticada com `title`, `description` e `categoryId`. A API valida a categoria, usa o usuário da sessão como solicitante e deixa o banco atribuir o código, a data de abertura e o status inicial `OPEN`. O retorno contém esses dados e responde `201`.
+
 ## Verificações
 
 ```sh
@@ -56,7 +60,7 @@ pnpm --filter @portal/api db:status
 - `packages/contracts`: esquemas Zod e tipos compartilhados.
 - `docs`: [dicionário de dados](docs/data-dictionary.md) e documentação técnica adicionada conforme o projeto avança.
 
-O script de criação SQL está na migration inicial. O cadastro e acompanhamento das solicitações entram nos próximos incrementos.
+O script de criação SQL está na migration inicial. A edição, exclusão, listagem e acompanhamento das solicitações entram nos próximos incrementos.
 
 ## Histórico de desenvolvimento
 
