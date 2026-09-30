@@ -10,6 +10,7 @@ import {
 } from 'antd';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { healthResponseSchema } from '@portal/contracts';
+import { useNavigate } from 'react-router-dom';
 import { logout, sessionQueryKey } from '../auth/auth.api';
 import { useSession } from '../auth/use-session';
 import { useViewPreferences } from '../state/view-preferences';
@@ -21,6 +22,7 @@ async function fetchHealth() {
 }
 
 export function HomePage() {
+  const navigate = useNavigate();
   const compact = useViewPreferences((state) => state.compact);
   const setCompact = useViewPreferences((state) => state.setCompact);
   const queryClient = useQueryClient();
@@ -52,6 +54,9 @@ export function HomePage() {
             </Typography.Text>
           </div>
           <Space>
+            <Button type="primary" onClick={() => navigate('/requests/new')}>
+              Nova solicitação
+            </Button>
             <Typography.Text>Visualização compacta</Typography.Text>
             <Switch
               checked={compact}

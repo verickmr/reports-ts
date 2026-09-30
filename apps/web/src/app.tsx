@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { RequireAuth } from './auth/require-auth';
+import { CreateRequestPage } from './pages/create-request-page';
 import { HomePage } from './pages/home-page';
 import { LoginPage } from './pages/login-page';
 
@@ -12,6 +13,14 @@ export function App() {
         element={
           <RequireAuth>
             <HomePage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/requests/new"
+        element={
+          <RequireAuth>
+            <CreateRequestPage />
           </RequireAuth>
         }
       />
