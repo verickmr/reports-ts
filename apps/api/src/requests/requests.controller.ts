@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Put,
   Query,
   Req,
   UseGuards,
@@ -15,6 +16,7 @@ import {
   listRequestsQuerySchema,
   requestIdSchema,
   updateRequestStatusSchema,
+  updateRequestInputSchema,
   type CreatedRequest,
   type ListedRequests,
   type RequestDetail,
@@ -59,6 +61,20 @@ export class RequestsController {
       throw new BadRequestException('Informe um status válido.');
     }
     return this.requests.updateStatus(parseRequestId(id), parsed.data);
+  }
+
+  @Put(':id')
+  update(
+    @Param('id') id: string,
+    @Body() body: unknown,
+  ): Promise<RequestDetail> {
+    const parsed = updateRequestInputSchema.safeParse(body);
+    if (!parsed.success) {
+      throw new BadRequestException(
+        'Informe título, descrição e categoria válidos.',
+      );
+    }
+    return this.requests.update(parseRequestId(id), parsed.data);
   }
 
   @Post()

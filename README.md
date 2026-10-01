@@ -50,6 +50,8 @@ Filtros opcionais em `GET /api/requests`: `title` (busca parcial sem diferenciar
 
 `PATCH /api/requests/:id/status` recebe `{ "status": "OPEN" | "IN_PROGRESS" | "COMPLETED" }`, exige sessão ativa e devolve os detalhes atualizados. O enunciado não restringe a ordem das mudanças de status.
 
+`PUT /api/requests/:id` recebe título, descrição e categoria completos. A alteração é permitida apenas enquanto a solicitação está `OPEN`; responde `409` quando já está em atendimento ou concluída.
+
 ## Verificações
 
 ```sh

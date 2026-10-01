@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -10,6 +11,7 @@ import type {
   ListedRequests,
   RequestDetail,
   UpdateRequestStatusInput,
+  UpdateRequestInput,
 } from '@portal/contracts';
 import { PrismaService } from '../database/prisma.service.js';
 
@@ -91,15 +93,34 @@ export class RequestsService {
     return this.detail(id);
   }
 
+  async update(id: number, input: UpdateRequestInput): Promise<RequestDetail> {
+    await this.assertCategoryExists(input.categoryId);
+    const updated = await this.prisma.request.updateMany({
+      where: { id, status: 'OPEN' },
+      data: {
+        title: input.title,
+        description: input.description,
+        categoryId: input.categoryId,
+      },
+    });
+    if (updated.count === 0) {
+      const existing = await this.prisma.request.findUnique({
+        where: { id },
+        select: { id: true },
+      });
+      if (!existing) throw new NotFoundException('Solicitação não encontrada.');
+      throw new ConflictException(
+        'Apenas solicitações abertas podem ser editadas.',
+      );
+    }
+    return this.detail(id);
+  }
+
   async create(
     input: CreateRequestInput,
     requesterId: string,
   ): Promise<CreatedRequest> {
-    const category = await this.prisma.category.findUnique({
-      where: { id: input.categoryId },
-      select: { id: true },
-    });
-    if (!category) throw new BadRequestException('Categoria inválida.');
+    await this.assertCategoryExists(input.categoryId);
 
     const request = await this.prisma.request.create({
       data: {
@@ -123,5 +144,13 @@ export class RequestsService {
       ...request,
       createdAt: request.createdAt.toISOString(),
     };
+  }
+
+  private async assertCategoryExists(categoryId: number): Promise<void> {
+    const category = await this.prisma.category.findUnique({
+      where: { id: categoryId },
+      select: { id: true },
+    });
+    if (!category) throw new BadRequestException('Categoria inválida.');
   }
 }

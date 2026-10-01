@@ -57,6 +57,9 @@ export const createdRequestSchema = z.object({
 export type CreateRequestInput = z.infer<typeof createRequestInputSchema>;
 export type CreatedRequest = z.infer<typeof createdRequestSchema>;
 
+export const updateRequestInputSchema = createRequestInputSchema;
+export type UpdateRequestInput = z.infer<typeof updateRequestInputSchema>;
+
 export const listedRequestSchema = createdRequestSchema
   .pick({ id: true, title: true, status: true, createdAt: true })
   .extend({
