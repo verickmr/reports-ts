@@ -72,10 +72,10 @@ pnpm --filter @portal/api db:status
 - `apps/web`: React, Vite, Ant Design, TanStack Query e Zustand.
 - `apps/api`: NestJS, autenticação, schema e migrations Prisma, seed.
 - `packages/contracts`: esquemas Zod e tipos compartilhados.
-- `docs`: [dicionário de dados](docs/data-dictionary.md) e documentação técnica adicionada conforme o projeto avança.
+- `docs`: [dicionário de dados](docs/data-dictionary.md) e [Memorial Técnico de Desenvolvimento](docs/memorial-tecnico-de-desenvolvimento.md).
 
-O script de criação SQL está na migration inicial. O dashboard visual entra no próximo incremento.
+O script de criação SQL está na migration inicial.
 
 ## Histórico de desenvolvimento
 
-Os commits seguem Conventional Commits e representam incrementos verificáveis: `chore(monorepo)` para a fundação, `feat(database)` para o banco e `feat(auth)` para login e sessão. Os próximos marcos usarão `feat(requests)` e `feat(dashboard)` conforme as funcionalidades forem concluídas; correções isoladas usam `fix(...)`.
+Os commits seguem Conventional Commits e representam incrementos verificáveis: `chore(monorepo)` para a fundação, `feat(database)` para o banco, `feat(auth)` para login e sessão, `feat(requests)` para solicitações e `feat(dashboard)` para indicadores. Correções isoladas usam `fix(...)`.

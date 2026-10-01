@@ -1,6 +1,6 @@
 # Dicionário de dados
 
-O banco usa PostgreSQL 16. A migration inicial está em `apps/api/prisma/migrations/20260929160000_initial/migration.sql`. Datas são armazenadas com fuso (`TIMESTAMPTZ`) em UTC; a interface apresentará e filtrará os dias em `America/Sao_Paulo`.
+O banco usa PostgreSQL 16. A migration inicial está em `apps/api/prisma/migrations/20260929160000_initial/migration.sql`. Datas são armazenadas com fuso (`TIMESTAMPTZ`) em UTC; a interface apresenta datas no fuso local do navegador e converte os dias filtrados em limites ISO enviados à API.
 
 ## `users`
 
