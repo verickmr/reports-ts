@@ -84,6 +84,7 @@ test('recusa redirect HTTP remoto sem salvar tentativa', async () => {
   };
 
   try {
+    assert.equal(new GoogleAuthService(prisma).isAvailable(), false);
     await assert.rejects(() => new GoogleAuthService(prisma).beginLogin(), {
       message: 'GOOGLE_REDIRECT_URI inválida.',
     });

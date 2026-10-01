@@ -25,6 +25,11 @@ export type LoginInput = z.infer<typeof loginInputSchema>;
 export type AuthUser = z.infer<typeof authUserSchema>;
 export type AuthResponse = z.infer<typeof authResponseSchema>;
 
+export const googleAuthAvailabilitySchema = z.object({ enabled: z.boolean() });
+export type GoogleAuthAvailability = z.infer<
+  typeof googleAuthAvailabilitySchema
+>;
+
 export const categorySchema = z.object({
   id: z.number().int().positive(),
   slug: z.string(),

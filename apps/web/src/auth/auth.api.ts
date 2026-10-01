@@ -1,11 +1,22 @@
 import {
   authResponseSchema,
+  googleAuthAvailabilitySchema,
   loginInputSchema,
   type AuthResponse,
+  type GoogleAuthAvailability,
   type LoginInput,
 } from '@portal/contracts';
 
 export const sessionQueryKey = ['session'] as const;
+export const googleAvailabilityQueryKey = ['google-auth-availability'] as const;
+
+export async function fetchGoogleAvailability(): Promise<GoogleAuthAvailability> {
+  const response = await fetch('/api/auth/google/availability');
+  if (!response.ok) {
+    throw new Error('Não foi possível verificar o login Google.');
+  }
+  return googleAuthAvailabilitySchema.parse(await response.json());
+}
 
 export async function fetchSession(): Promise<AuthResponse | null> {
   const response = await fetch('/api/auth/me');

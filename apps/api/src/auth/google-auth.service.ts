@@ -17,38 +17,53 @@ function sha256(value: string): string {
   return createHash('sha256').update(value, 'ascii').digest('hex');
 }
 
+function readGoogleConfig(): { clientId: string; redirectUri: string } {
+  const clientId = process.env.GOOGLE_CLIENT_ID;
+  const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+  const redirectUri = process.env.GOOGLE_REDIRECT_URI;
+  if (!clientId || !clientSecret || !redirectUri) {
+    throw new ServiceUnavailableException('Login Google não configurado.');
+  }
+
+  let callback: URL;
+  try {
+    callback = new URL(redirectUri);
+  } catch {
+    throw new ServiceUnavailableException('GOOGLE_REDIRECT_URI inválida.');
+  }
+  if (
+    callback.hash ||
+    callback.search ||
+    callback.username ||
+    callback.password ||
+    callback.pathname !== '/api/auth/google/callback' ||
+    (callback.protocol !== 'https:' &&
+      !(
+        callback.protocol === 'http:' &&
+        ['localhost', '127.0.0.1'].includes(callback.hostname)
+      ))
+  ) {
+    throw new ServiceUnavailableException('GOOGLE_REDIRECT_URI inválida.');
+  }
+
+  return { clientId, redirectUri };
+}
+
 @Injectable()
 export class GoogleAuthService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async beginLogin(): Promise<{ authorizationUrl: string; state: string }> {
-    const clientId = process.env.GOOGLE_CLIENT_ID;
-    const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-    const redirectUri = process.env.GOOGLE_REDIRECT_URI;
-    if (!clientId || !clientSecret || !redirectUri) {
-      throw new ServiceUnavailableException('Login Google não configurado.');
-    }
-
-    let callback: URL;
+  isAvailable(): boolean {
     try {
-      callback = new URL(redirectUri);
+      readGoogleConfig();
+      return true;
     } catch {
-      throw new ServiceUnavailableException('GOOGLE_REDIRECT_URI inválida.');
+      return false;
     }
-    if (
-      callback.hash ||
-      callback.search ||
-      callback.username ||
-      callback.password ||
-      callback.pathname !== '/api/auth/google/callback' ||
-      (callback.protocol !== 'https:' &&
-        !(
-          callback.protocol === 'http:' &&
-          ['localhost', '127.0.0.1'].includes(callback.hostname)
-        ))
-    ) {
-      throw new ServiceUnavailableException('GOOGLE_REDIRECT_URI inválida.');
-    }
+  }
+
+  async beginLogin(): Promise<{ authorizationUrl: string; state: string }> {
+    const { clientId, redirectUri } = readGoogleConfig();
 
     const state = randomBytes(32).toString('base64url');
     const codeVerifier = randomBytes(32).toString('base64url');

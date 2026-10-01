@@ -66,6 +66,7 @@ test('inicia Google e conclui callback somente com state do mesmo navegador', as
   }
 
   try {
+    assert.deepEqual(controller.availability(), { enabled: true });
     const start = response();
     await controller.start(start);
     assert.equal(start.redirected.status, 302);

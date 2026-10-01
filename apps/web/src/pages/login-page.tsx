@@ -1,14 +1,34 @@
-import { Alert, Button, Card, Form, Input, Layout, Typography } from 'antd';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  Alert,
+  Button,
+  Card,
+  Divider,
+  Form,
+  Input,
+  Layout,
+  Typography,
+} from 'antd';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Navigate, useNavigate } from 'react-router-dom';
 import type { LoginInput } from '@portal/contracts';
-import { login, sessionQueryKey } from '../auth/auth.api';
+import {
+  fetchGoogleAvailability,
+  googleAvailabilityQueryKey,
+  login,
+  sessionQueryKey,
+} from '../auth/auth.api';
 import { useSession } from '../auth/use-session';
 
 export function LoginPage() {
   const session = useSession();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const googleAvailability = useQuery({
+    queryKey: googleAvailabilityQueryKey,
+    queryFn: fetchGoogleAvailability,
+    retry: false,
+    staleTime: 5 * 60 * 1000,
+  });
   const signIn = useMutation({
     mutationFn: login,
     onSuccess: (data) => {
@@ -61,6 +81,14 @@ export function LoginPage() {
             Entrar
           </Button>
         </Form>
+        {googleAvailability.data?.enabled && (
+          <>
+            <Divider plain>ou</Divider>
+            <Button href="/api/auth/google/start" block>
+              Entrar com Google
+            </Button>
+          </>
+        )}
       </Card>
     </Layout>
   );

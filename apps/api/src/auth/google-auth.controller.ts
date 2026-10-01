@@ -1,3 +1,4 @@
+import type { GoogleAuthAvailability } from '@portal/contracts';
 import {
   Controller,
   Get,
@@ -27,6 +28,11 @@ export class GoogleAuthController {
     private readonly tokens: GoogleTokenService,
     private readonly accounts: GoogleAccountService,
   ) {}
+
+  @Get('availability')
+  availability(): GoogleAuthAvailability {
+    return { enabled: this.attempts.isAvailable() };
+  }
 
   @Get('start')
   async start(@Res() response: RedirectResponse): Promise<void> {
