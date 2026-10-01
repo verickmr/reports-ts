@@ -4,12 +4,22 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { googleStatePattern } from './google-auth.constants.js';
+import {
+  GoogleIdTokenVerifier,
+  type GoogleIdentity,
+} from './google-id-token-verifier.js';
 
 const tokenEndpoint = 'https://oauth2.googleapis.com/token';
 const exchangeFailed = 'Não foi possível concluir o login Google.';
 
 @Injectable()
 export class GoogleTokenService {
+  private readonly verifier = new GoogleIdTokenVerifier();
+
+  verifyIdToken(idToken: string, nonce: string): Promise<GoogleIdentity> {
+    return this.verifier.verify(idToken, nonce);
+  }
+
   async exchangeCode(code: string, codeVerifier: string): Promise<string> {
     const clientId = process.env.GOOGLE_CLIENT_ID;
     const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
