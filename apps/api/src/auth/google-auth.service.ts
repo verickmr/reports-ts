@@ -64,6 +64,10 @@ export class GoogleAuthService {
 
   async beginLogin(): Promise<{ authorizationUrl: string; state: string }> {
     const { clientId, redirectUri } = readGoogleConfig();
+    const now = new Date();
+    await this.prisma.googleAuthAttempt.deleteMany({
+      where: { expiresAt: { lte: now } },
+    });
 
     const state = randomBytes(32).toString('base64url');
     const codeVerifier = randomBytes(32).toString('base64url');
@@ -78,7 +82,7 @@ export class GoogleAuthService {
         purpose: 'LOGIN',
         codeVerifier,
         nonce,
-        expiresAt: new Date(Date.now() + googleAuthAttemptDurationMs),
+        expiresAt: new Date(now.getTime() + googleAuthAttemptDurationMs),
       },
     });
 

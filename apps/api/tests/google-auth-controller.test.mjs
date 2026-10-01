@@ -24,6 +24,12 @@ test('inicia Google e conclui callback somente com state do mesmo navegador', as
         return where.stateHash === attempt?.stateHash ? attempt : null;
       },
       async deleteMany({ where }) {
+        if (where.expiresAt?.lte) {
+          if (!attempt || attempt.expiresAt > where.expiresAt.lte)
+            return { count: 0 };
+          attempt = null;
+          return { count: 1 };
+        }
         if (where.stateHash !== attempt?.stateHash) return { count: 0 };
         attempt = null;
         return { count: 1 };

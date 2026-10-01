@@ -65,4 +65,4 @@ As duas chaves estrangeiras restringem a exclusão de usuários e categorias com
 | `expires_at`    | TIMESTAMPTZ(3)      | Prazo curto da tentativa, validado na API.                    |
 | `created_at`    | TIMESTAMPTZ(3)      | Data de criação.                                              |
 
-Uma tentativa de vínculo depende da sessão local e é removida se essa sessão for encerrada. A migração impede `LINK` sem sessão e `LOGIN` com sessão. O retorno do Google consome tentativas `LOGIN` uma única vez e rejeita tentativas expiradas; o fluxo `LINK` ainda não está disponível.
+Uma tentativa de vínculo depende da sessão local e é removida se essa sessão for encerrada. A migração impede `LINK` sem sessão e `LOGIN` com sessão. O retorno do Google consome tentativas `LOGIN` uma única vez e rejeita tentativas expiradas. Ao iniciar um novo login Google, a API remove tentativas expiradas de qualquer finalidade e preserva as ativas; o fluxo `LINK` ainda não está disponível.

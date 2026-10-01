@@ -15,9 +15,19 @@ test('prepara tentativa Google com state persistido e PKCE S256', async () => {
   process.env.GOOGLE_CLIENT_SECRET = 'test-client-secret';
   process.env.GOOGLE_REDIRECT_URI =
     'http://127.0.0.1:3000/api/auth/google/callback';
-  const attempts = [];
+  const attempts = [
+    { stateHash: 'expired', expiresAt: new Date(Date.now() - 60_000) },
+    { stateHash: 'active', expiresAt: new Date(Date.now() + 60_000) },
+  ];
   const prisma = {
     googleAuthAttempt: {
+      async deleteMany({ where }) {
+        assert.deepEqual(Object.keys(where), ['expiresAt']);
+        const cutoff = where.expiresAt.lte;
+        const expired = attempts.filter((item) => item.expiresAt <= cutoff);
+        for (const item of expired) attempts.splice(attempts.indexOf(item), 1);
+        return { count: expired.length };
+      },
       async create({ data }) {
         attempts.push(data);
       },
@@ -29,9 +39,10 @@ test('prepara tentativa Google com state persistido e PKCE S256', async () => {
       prisma,
     ).beginLogin();
     const url = new URL(authorizationUrl);
-    const attempt = attempts[0];
+    const attempt = attempts[1];
 
-    assert.equal(attempts.length, 1);
+    assert.equal(attempts.length, 2);
+    assert.equal(attempts[0].stateHash, 'active');
     assert.equal(url.origin, 'https://accounts.google.com');
     assert.equal(url.pathname, '/o/oauth2/v2/auth');
     assert.equal(url.searchParams.get('client_id'), 'test-client-id');
