@@ -17,13 +17,18 @@ import {
   Typography,
   type TableColumnsType,
 } from 'antd';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 import {
   healthResponseSchema,
   type ListedRequests,
   type ListRequestsQuery,
 } from '@portal/contracts';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { logout, sessionQueryKey } from '../auth/auth.api';
 import { useSession } from '../auth/use-session';
@@ -91,6 +96,8 @@ async function fetchHealth() {
 export function HomePage() {
   const [filterForm] = Form.useForm<RequestFilterForm>();
   const [filters, setFilters] = useState<ListRequestsQuery>({});
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const navigate = useNavigate();
   const compact = useViewPreferences((state) => state.compact);
   const setCompact = useViewPreferences((state) => state.setCompact);
@@ -110,8 +117,9 @@ export function HomePage() {
     queryFn: listCategories,
   });
   const requests = useQuery({
-    queryKey: ['requests', filters],
-    queryFn: () => listRequests(filters),
+    queryKey: ['requests', filters, page, pageSize],
+    queryFn: () => listRequests({ ...filters, page, pageSize }),
+    placeholderData: keepPreviousData,
     retry: false,
   });
   const summary = useQuery({
@@ -119,6 +127,12 @@ export function HomePage() {
     queryFn: getRequestSummary,
     retry: false,
   });
+
+  useEffect(() => {
+    if (!requests.data || requests.isPlaceholderData) return;
+    const lastPage = Math.max(1, Math.ceil(requests.data.total / pageSize));
+    if (page > lastPage) setPage(lastPage);
+  }, [page, pageSize, requests.data, requests.isPlaceholderData]);
 
   function applyFilters(values: RequestFilterForm) {
     if (values.fromDate && values.toDate && values.fromDate > values.toDate) {
@@ -141,6 +155,7 @@ export function HomePage() {
         ? nextLocalDayStart(values.toDate).toISOString()
         : undefined,
     });
+    setPage(1);
   }
 
   return (
@@ -298,6 +313,7 @@ export function HomePage() {
                       onClick={() => {
                         filterForm.resetFields();
                         setFilters({});
+                        setPage(1);
                       }}
                     >
                       Limpar
@@ -322,10 +338,20 @@ export function HomePage() {
             <Table<ListedRequest>
               rowKey="id"
               columns={columns}
-              dataSource={requests.data ?? []}
-              loading={requests.isPending}
+              dataSource={requests.data?.items ?? []}
+              loading={requests.isFetching}
               locale={{ emptyText: 'Nenhuma solicitação cadastrada.' }}
-              pagination={{ pageSize: 10 }}
+              pagination={{
+                current: page,
+                pageSize,
+                total: requests.data?.total ?? 0,
+                showSizeChanger: true,
+                pageSizeOptions: [10, 20, 50, 100],
+                onChange: (nextPage, nextPageSize) => {
+                  setPage(nextPageSize === pageSize ? nextPage : 1);
+                  setPageSize(nextPageSize);
+                },
+              }}
               scroll={{ x: 740 }}
             />
           )}

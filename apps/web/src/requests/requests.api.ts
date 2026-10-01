@@ -1,16 +1,16 @@
 import {
   createdRequestSchema,
   createRequestInputSchema,
-  listRequestsQuerySchema,
-  listedRequestsSchema,
+  paginatedListRequestsQuerySchema,
+  paginatedRequestsSchema,
   requestDetailSchema,
   requestSummarySchema,
   updateRequestStatusSchema,
   updateRequestInputSchema,
   type CreatedRequest,
   type CreateRequestInput,
-  type ListRequestsQuery,
-  type ListedRequests,
+  type PaginatedListRequestsQuery,
+  type PaginatedRequests,
   type RequestDetail,
   type RequestSummary,
   type UpdateRequestStatusInput,
@@ -114,22 +114,22 @@ export async function getRequestDetail(id: number): Promise<RequestDetail> {
 }
 
 export async function listRequests(
-  filters: ListRequestsQuery = {},
-): Promise<ListedRequests> {
-  const query = listRequestsQuerySchema.parse(filters);
+  filters: PaginatedListRequestsQuery,
+): Promise<PaginatedRequests> {
+  const query = paginatedListRequestsQuerySchema.parse(filters);
   const params = new URLSearchParams();
   for (const [name, value] of Object.entries(query)) {
     if (value !== undefined) params.set(name, String(value));
   }
   const search = params.toString();
-  const response = await fetch(`/api/requests${search ? `?${search}` : ''}`);
+  const response = await fetch(`/api/requests/page?${search}`);
   if (response.status === 401) {
     throw new Error('Sua sessão expirou. Atualize a página e entre novamente.');
   }
   if (!response.ok) {
     throw new Error('Não foi possível carregar as solicitações.');
   }
-  return listedRequestsSchema.parse(await response.json());
+  return paginatedRequestsSchema.parse(await response.json());
 }
 
 export async function createRequest(
