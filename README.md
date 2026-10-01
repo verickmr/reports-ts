@@ -162,10 +162,13 @@ Abra `https://portal.example.com` e entre com um usuário criado pelo seed. Mant
 pnpm build
 pnpm typecheck
 pnpm lint
+pnpm test
 pnpm format:check
 pnpm --filter @portal/api db:validate
 pnpm --filter @portal/api db:status
 ```
+
+`pnpm test` executa os testes versionados dos contratos Zod, incluindo entradas de solicitação, filtros, códigos, status e resumo. A verificação HTTP integrada ainda não faz parte da suíte versionada.
 
 ## Estrutura
 
