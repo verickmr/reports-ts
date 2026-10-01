@@ -9,6 +9,7 @@ import type {
   ListRequestsQuery,
   ListedRequests,
   RequestDetail,
+  UpdateRequestStatusInput,
 } from '@portal/contracts';
 import { PrismaService } from '../database/prisma.service.js';
 
@@ -74,6 +75,20 @@ export class RequestsService {
       createdAt: request.createdAt.toISOString(),
       updatedAt: request.updatedAt.toISOString(),
     };
+  }
+
+  async updateStatus(
+    id: number,
+    input: UpdateRequestStatusInput,
+  ): Promise<RequestDetail> {
+    const updated = await this.prisma.request.updateMany({
+      where: { id },
+      data: { status: input.status },
+    });
+    if (updated.count === 0) {
+      throw new NotFoundException('Solicitação não encontrada.');
+    }
+    return this.detail(id);
   }
 
   async create(

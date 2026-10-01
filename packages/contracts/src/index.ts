@@ -97,3 +97,11 @@ export const requestDetailSchema = listedRequestSchema.extend({
 });
 
 export type RequestDetail = z.infer<typeof requestDetailSchema>;
+
+export const updateRequestStatusSchema = z.strictObject({
+  status: requestStatusSchema,
+});
+
+export type UpdateRequestStatusInput = z.infer<
+  typeof updateRequestStatusSchema
+>;

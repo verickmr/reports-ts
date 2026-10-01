@@ -4,6 +4,7 @@ import {
   Controller,
   Get,
   Param,
+  Patch,
   Post,
   Query,
   Req,
@@ -13,12 +14,21 @@ import {
   createRequestInputSchema,
   listRequestsQuerySchema,
   requestIdSchema,
+  updateRequestStatusSchema,
   type CreatedRequest,
   type ListedRequests,
   type RequestDetail,
 } from '@portal/contracts';
 import { AuthenticatedRequest, SessionGuard } from '../auth/session.guard.js';
 import { RequestsService } from './requests.service.js';
+
+function parseRequestId(id: string): number {
+  const parsed = requestIdSchema.safeParse(id);
+  if (!parsed.success) {
+    throw new BadRequestException('Código da solicitação inválido.');
+  }
+  return parsed.data;
+}
 
 @Controller('requests')
 @UseGuards(SessionGuard)
@@ -36,11 +46,19 @@ export class RequestsController {
 
   @Get(':id')
   detail(@Param('id') id: string): Promise<RequestDetail> {
-    const parsed = requestIdSchema.safeParse(id);
+    return this.requests.detail(parseRequestId(id));
+  }
+
+  @Patch(':id/status')
+  updateStatus(
+    @Param('id') id: string,
+    @Body() body: unknown,
+  ): Promise<RequestDetail> {
+    const parsed = updateRequestStatusSchema.safeParse(body);
     if (!parsed.success) {
-      throw new BadRequestException('Código da solicitação inválido.');
+      throw new BadRequestException('Informe um status válido.');
     }
-    return this.requests.detail(parsed.data);
+    return this.requests.updateStatus(parseRequestId(id), parsed.data);
   }
 
   @Post()

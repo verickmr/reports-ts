@@ -39,7 +39,7 @@ O seed cria TI, RH, Compras, Financeiro e Infraestrutura.
 | `created_at`   | TIMESTAMPTZ(3)  | Data de abertura.                                              |
 | `updated_at`   | TIMESTAMPTZ(3)  | Atualizada pelo Prisma em alterações.                          |
 
-As duas chaves estrangeiras restringem a exclusão de usuários e categorias com solicitações. Índices apoiam a listagem por solicitante, status e categoria, cada um combinado com a data de abertura. A regra de transição de status será aplicada na API, não pelo enum do banco.
+As duas chaves estrangeiras restringem a exclusão de usuários e categorias com solicitações. Índices apoiam a listagem por solicitante, status e categoria, cada um combinado com a data de abertura. A API valida os três valores de status permitidos; o enunciado não define uma ordem obrigatória de transição.
 
 ## `sessions`
 

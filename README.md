@@ -48,6 +48,8 @@ Filtros opcionais em `GET /api/requests`: `title` (busca parcial sem diferenciar
 
 `GET /api/requests/:id` mostra os detalhes da solicitação, incluindo descrição e última atualização. Um código inválido responde `400`; uma solicitação inexistente responde `404`.
 
+`PATCH /api/requests/:id/status` recebe `{ "status": "OPEN" | "IN_PROGRESS" | "COMPLETED" }`, exige sessão ativa e devolve os detalhes atualizados. O enunciado não restringe a ordem das mudanças de status.
+
 ## Verificações
 
 ```sh
