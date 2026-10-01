@@ -30,6 +30,11 @@ function RequestDetailContent({ id }: { id: number }) {
   return (
     <Card
       title={`Solicitação #${id}`}
+      extra={
+        detail.isSuccess && detail.data.status === 'OPEN' ? (
+          <Link to={`/requests/${id}/edit`}>Editar solicitação</Link>
+        ) : null
+      }
       loading={detail.isPending}
       className="detail-card"
     >

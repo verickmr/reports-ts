@@ -1,22 +1,13 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import type { CreateRequestInput } from '@portal/contracts';
-import {
-  Alert,
-  Button,
-  Card,
-  Form,
-  Input,
-  Layout,
-  Select,
-  Space,
-  Typography,
-} from 'antd';
+import { Alert, Button, Card, Form, Layout, Space, Typography } from 'antd';
 import { Link } from 'react-router-dom';
 import {
   categoriesQueryKey,
   listCategories,
 } from '../categories/categories.api';
 import { createRequest } from '../requests/requests.api';
+import { RequestFormFields } from '../requests/request-form-fields';
 
 export function CreateRequestPage() {
   const [form] = Form.useForm<CreateRequestInput>();
@@ -76,46 +67,11 @@ export function CreateRequestPage() {
               layout="vertical"
               onFinish={(values) => creation.mutate(values)}
             >
-              <Form.Item
-                label="Título"
-                name="title"
-                rules={[
-                  { required: true, message: 'Informe o título.' },
-                  { whitespace: true, message: 'Informe um título válido.' },
-                ]}
-              >
-                <Input maxLength={150} />
-              </Form.Item>
-              <Form.Item
-                label="Descrição"
-                name="description"
-                rules={[
-                  { required: true, message: 'Informe a descrição.' },
-                  {
-                    whitespace: true,
-                    message: 'Informe uma descrição válida.',
-                  },
-                ]}
-              >
-                <Input.TextArea rows={5} />
-              </Form.Item>
-              <Form.Item
-                label="Categoria"
-                name="categoryId"
-                rules={[
-                  { required: true, message: 'Selecione uma categoria.' },
-                ]}
-              >
-                <Select
-                  placeholder="Selecione uma categoria"
-                  loading={categories.isPending}
-                  disabled={!categories.isSuccess}
-                  options={categories.data?.map((category) => ({
-                    value: category.id,
-                    label: category.name,
-                  }))}
-                />
-              </Form.Item>
+              <RequestFormFields
+                categories={categories.data}
+                categoriesLoading={categories.isPending}
+                categoriesDisabled={!categories.isSuccess}
+              />
               <Button
                 type="primary"
                 htmlType="submit"

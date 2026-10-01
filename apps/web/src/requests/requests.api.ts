@@ -5,13 +5,44 @@ import {
   listedRequestsSchema,
   requestDetailSchema,
   updateRequestStatusSchema,
+  updateRequestInputSchema,
   type CreatedRequest,
   type CreateRequestInput,
   type ListRequestsQuery,
   type ListedRequests,
   type RequestDetail,
   type UpdateRequestStatusInput,
+  type UpdateRequestInput,
 } from '@portal/contracts';
+
+export async function updateRequest(
+  id: number,
+  input: UpdateRequestInput,
+): Promise<RequestDetail> {
+  const response = await fetch(`/api/requests/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(updateRequestInputSchema.parse(input)),
+  });
+  if (response.status === 400) {
+    throw new Error('Confira título, descrição e categoria.');
+  }
+  if (response.status === 401) {
+    throw new Error('Sua sessão expirou. Atualize a página e entre novamente.');
+  }
+  if (response.status === 404) {
+    throw new Error('Solicitação não encontrada.');
+  }
+  if (response.status === 409) {
+    throw new Error(
+      'Esta solicitação deixou de estar aberta. Atualize os detalhes.',
+    );
+  }
+  if (!response.ok) {
+    throw new Error('Não foi possível editar a solicitação.');
+  }
+  return requestDetailSchema.parse(await response.json());
+}
 
 export async function updateRequestStatus(
   id: number,
