@@ -3,11 +3,27 @@ import {
   createRequestInputSchema,
   listRequestsQuerySchema,
   listedRequestsSchema,
+  requestDetailSchema,
   type CreatedRequest,
   type CreateRequestInput,
   type ListRequestsQuery,
   type ListedRequests,
+  type RequestDetail,
 } from '@portal/contracts';
+
+export async function getRequestDetail(id: number): Promise<RequestDetail> {
+  const response = await fetch(`/api/requests/${id}`);
+  if (response.status === 404) {
+    throw new Error('Solicitação não encontrada.');
+  }
+  if (response.status === 401) {
+    throw new Error('Sua sessão expirou. Atualize a página e entre novamente.');
+  }
+  if (!response.ok) {
+    throw new Error('Não foi possível carregar a solicitação.');
+  }
+  return requestDetailSchema.parse(await response.json());
+}
 
 export async function listRequests(
   filters: ListRequestsQuery = {},

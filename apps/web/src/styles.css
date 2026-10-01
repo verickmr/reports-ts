@@ -30,6 +30,10 @@ body {
   margin-top: 32px;
 }
 
+.detail-card {
+  margin-top: 24px;
+}
+
 .request-form-container {
   display: flex;
   width: 100%;

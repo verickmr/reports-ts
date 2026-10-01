@@ -23,7 +23,7 @@ import {
   type ListRequestsQuery,
 } from '@portal/contracts';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { logout, sessionQueryKey } from '../auth/auth.api';
 import { useSession } from '../auth/use-session';
 import {
@@ -31,6 +31,7 @@ import {
   listCategories,
 } from '../categories/categories.api';
 import { listRequests } from '../requests/requests.api';
+import { statusColors, statusLabels } from '../requests/request-status';
 import { useViewPreferences } from '../state/view-preferences';
 
 type ListedRequest = ListedRequests[number];
@@ -52,25 +53,17 @@ function nextLocalDayStart(date: string): Date {
   return next;
 }
 
-const statusLabels: Record<ListedRequest['status'], string> = {
-  OPEN: 'Aberta',
-  IN_PROGRESS: 'Em andamento',
-  COMPLETED: 'Concluída',
-};
-
-const statusColors: Record<ListedRequest['status'], string> = {
-  OPEN: 'blue',
-  IN_PROGRESS: 'gold',
-  COMPLETED: 'green',
-};
-
 const dateFormatter = new Intl.DateTimeFormat('pt-BR', {
   dateStyle: 'short',
   timeStyle: 'short',
 });
 
 const columns: TableColumnsType<ListedRequest> = [
-  { title: 'Código', dataIndex: 'id', render: (id: number) => `#${id}` },
+  {
+    title: 'Código',
+    dataIndex: 'id',
+    render: (id: number) => <Link to={`/requests/${id}`}>#{id}</Link>,
+  },
   { title: 'Título', dataIndex: 'title' },
   { title: 'Categoria', dataIndex: ['category', 'name'] },
   { title: 'Solicitante', dataIndex: ['requester', 'name'] },

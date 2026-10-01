@@ -3,6 +3,7 @@ import { RequireAuth } from './auth/require-auth';
 import { CreateRequestPage } from './pages/create-request-page';
 import { HomePage } from './pages/home-page';
 import { LoginPage } from './pages/login-page';
+import { RequestDetailPage } from './pages/request-detail-page';
 
 export function App() {
   return (
@@ -21,6 +22,14 @@ export function App() {
         element={
           <RequireAuth>
             <CreateRequestPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/requests/:id"
+        element={
+          <RequireAuth>
+            <RequestDetailPage />
           </RequireAuth>
         }
       />
