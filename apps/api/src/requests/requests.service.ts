@@ -10,6 +10,7 @@ import type {
   ListRequestsQuery,
   ListedRequests,
   RequestDetail,
+  RequestSummary,
   UpdateRequestStatusInput,
   UpdateRequestInput,
 } from '@portal/contracts';
@@ -18,6 +19,25 @@ import { PrismaService } from '../database/prisma.service.js';
 @Injectable()
 export class RequestsService {
   constructor(private readonly prisma: PrismaService) {}
+
+  async summary(): Promise<RequestSummary> {
+    const groups = await this.prisma.request.groupBy({
+      by: ['status'],
+      _count: { status: true },
+    });
+    const byStatus: RequestSummary['byStatus'] = {
+      OPEN: 0,
+      IN_PROGRESS: 0,
+      COMPLETED: 0,
+    };
+    for (const group of groups) {
+      byStatus[group.status] = group._count.status;
+    }
+    return {
+      total: byStatus.OPEN + byStatus.IN_PROGRESS + byStatus.COMPLETED,
+      byStatus,
+    };
+  }
 
   async list(filters: ListRequestsQuery): Promise<ListedRequests> {
     const requests = await this.prisma.request.findMany({

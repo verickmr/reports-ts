@@ -23,6 +23,7 @@ import {
   type CreatedRequest,
   type ListedRequests,
   type RequestDetail,
+  type RequestSummary,
 } from '@portal/contracts';
 import { AuthenticatedRequest, SessionGuard } from '../auth/session.guard.js';
 import { RequestsService } from './requests.service.js';
@@ -39,6 +40,11 @@ function parseRequestId(id: string): number {
 @UseGuards(SessionGuard)
 export class RequestsController {
   constructor(private readonly requests: RequestsService) {}
+
+  @Get('summary')
+  summary(): Promise<RequestSummary> {
+    return this.requests.summary();
+  }
 
   @Get()
   list(@Query() query: unknown): Promise<ListedRequests> {

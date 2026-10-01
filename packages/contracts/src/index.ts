@@ -44,6 +44,17 @@ export const createRequestInputSchema = z.strictObject({
 
 export const requestStatusSchema = z.enum(['OPEN', 'IN_PROGRESS', 'COMPLETED']);
 
+export const requestSummarySchema = z.object({
+  total: z.number().int().nonnegative(),
+  byStatus: z.object({
+    OPEN: z.number().int().nonnegative(),
+    IN_PROGRESS: z.number().int().nonnegative(),
+    COMPLETED: z.number().int().nonnegative(),
+  }),
+});
+
+export type RequestSummary = z.infer<typeof requestSummarySchema>;
+
 export const createdRequestSchema = z.object({
   id: z.number().int().positive(),
   title: z.string(),

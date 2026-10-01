@@ -54,6 +54,8 @@ Filtros opcionais em `GET /api/requests`: `title` (busca parcial sem diferenciar
 
 `DELETE /api/requests/:id` exclui a solicitação apenas se ainda estiver `OPEN` e responde `204`. Para uma solicitação em atendimento ou concluída, responde `409`.
 
+`GET /api/requests/summary` exige sessão ativa e retorna o total de solicitações e a contagem por status (`OPEN`, `IN_PROGRESS`, `COMPLETED`), incluindo zeros quando não há registros.
+
 ## Verificações
 
 ```sh
@@ -72,7 +74,7 @@ pnpm --filter @portal/api db:status
 - `packages/contracts`: esquemas Zod e tipos compartilhados.
 - `docs`: [dicionário de dados](docs/data-dictionary.md) e documentação técnica adicionada conforme o projeto avança.
 
-O script de criação SQL está na migration inicial. A edição, exclusão e acompanhamento das solicitações entram nos próximos incrementos.
+O script de criação SQL está na migration inicial. O dashboard visual entra no próximo incremento.
 
 ## Histórico de desenvolvimento
 
