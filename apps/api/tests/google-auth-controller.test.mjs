@@ -33,6 +33,7 @@ test('inicia Google e conclui callback somente com state do mesmo navegador', as
   const attempts = new GoogleAuthService(prisma);
   const tokens = {
     async exchangeCode(code, verifier) {
+      if (code === 'bad-code') throw new Error('Token exchange failed.');
       exchanged = { code, verifier };
       return 'signed-id-token';
     },
@@ -78,15 +79,12 @@ test('inicia Google e conclui callback somente com state do mesmo navegador', as
     assert.equal(start.headers.get('Referrer-Policy'), 'no-referrer');
 
     const bad = response();
-    await assert.rejects(
-      () =>
-        controller.callback(
-          { iss: 'https://accounts.google.com', state, code: 'auth-code' },
-          { headers: { cookie: `portal_google_state=${'b'.repeat(43)}` } },
-          bad,
-        ),
-      { status: 401 },
+    await controller.callback(
+      { iss: 'https://accounts.google.com', state, code: 'auth-code' },
+      { headers: { cookie: `portal_google_state=${'b'.repeat(43)}` } },
+      bad,
     );
+    assert.equal(bad.redirected.url, '/login?google=failed');
     assert.equal(exchanged, undefined);
     assert.ok(attempt);
     assert.match(bad.headers.get('Set-Cookie')[0], /Max-Age=0/);
@@ -106,6 +104,44 @@ test('inicia Google e conclui callback somente com state do mesmo navegador', as
     assert.match(callback.headers.get('Set-Cookie')[0], /portal_session=/);
     assert.match(callback.headers.get('Set-Cookie')[1], /Max-Age=0/);
     assert.equal(attempt, null);
+
+    const cancelledStart = response();
+    await controller.start(cancelledStart);
+    const cancelledState = new URL(
+      cancelledStart.redirected.url,
+    ).searchParams.get('state');
+    const cancelled = response();
+    await controller.callback(
+      {
+        iss: 'https://accounts.google.com',
+        state: cancelledState,
+        error: 'access_denied',
+      },
+      { headers: { cookie: `portal_google_state=${cancelledState}` } },
+      cancelled,
+    );
+    assert.equal(cancelled.redirected.url, '/login?google=cancelled');
+    assert.match(cancelled.headers.get('Set-Cookie')[0], /Max-Age=0/);
+    assert.equal(attempt, null);
+
+    const failedStart = response();
+    await controller.start(failedStart);
+    const failedState = new URL(failedStart.redirected.url).searchParams.get(
+      'state',
+    );
+    const failed = response();
+    await controller.callback(
+      {
+        iss: 'https://accounts.google.com',
+        state: failedState,
+        code: 'bad-code',
+      },
+      { headers: { cookie: `portal_google_state=${failedState}` } },
+      failed,
+    );
+    assert.equal(failed.redirected.url, '/login?google=failed');
+    assert.match(failed.headers.get('Set-Cookie')[0], /Max-Age=0/);
+    assert.equal(failed.headers.get('Set-Cookie').length, 1);
   } finally {
     for (const [key, value] of [
       ['GOOGLE_CLIENT_ID', previous.clientId],

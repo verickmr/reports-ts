@@ -2,6 +2,7 @@ import type { GoogleAuthAvailability } from '@portal/contracts';
 import {
   Controller,
   Get,
+  Logger,
   Query,
   Req,
   Res,
@@ -23,6 +24,8 @@ type RedirectResponse = GoogleCookieResponse & {
 
 @Controller('auth/google')
 export class GoogleAuthController {
+  private readonly logger = new Logger(GoogleAuthController.name);
+
   constructor(
     private readonly attempts: GoogleAuthService,
     private readonly tokens: GoogleTokenService,
@@ -55,11 +58,7 @@ export class GoogleAuthController {
     try {
       if (
         query.iss !== 'https://accounts.google.com' ||
-        typeof query.state !== 'string' ||
-        typeof query.code !== 'string' ||
-        !query.code ||
-        query.code.length > 2_048 ||
-        query.error !== undefined
+        typeof query.state !== 'string'
       ) {
         throw new UnauthorizedException('Retorno do Google inválido.');
       }
@@ -68,12 +67,30 @@ export class GoogleAuthController {
         query.state,
         readGoogleStateCookie(request),
       );
+      if (query.error === 'access_denied' && query.code === undefined) {
+        writeGoogleStateCookie(response, null);
+        response.redirect(302, '/login?google=cancelled');
+        return;
+      }
+      if (
+        typeof query.code !== 'string' ||
+        !query.code ||
+        query.code.length > 2_048 ||
+        query.error !== undefined
+      ) {
+        throw new UnauthorizedException('Retorno do Google inválido.');
+      }
+
       const idToken = await this.tokens.exchangeCode(query.code, codeVerifier);
       const identity = await this.tokens.verifyIdToken(idToken, nonce);
       ({ token } = await this.accounts.login(identity));
     } catch (error) {
+      if (!(error instanceof UnauthorizedException)) {
+        this.logger.error('Falha ao concluir login Google.');
+      }
       writeGoogleStateCookie(response, null);
-      throw error;
+      response.redirect(302, '/login?google=failed');
+      return;
     }
 
     writeSessionCookie(response, token);

@@ -9,7 +9,7 @@ import {
   Typography,
 } from 'antd';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import type { LoginInput } from '@portal/contracts';
 import {
   fetchGoogleAvailability,
@@ -23,6 +23,8 @@ export function LoginPage() {
   const session = useSession();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const googleResult = searchParams.get('google');
   const googleAvailability = useQuery({
     queryKey: googleAvailabilityQueryKey,
     queryFn: fetchGoogleAvailability,
@@ -45,6 +47,22 @@ export function LoginPage() {
         <Typography.Paragraph>
           Acesse com seu usuário e senha para acompanhar solicitações internas.
         </Typography.Paragraph>
+        {googleResult === 'cancelled' && (
+          <Alert
+            type="info"
+            showIcon
+            message="Login com Google cancelado."
+            className="form-alert"
+          />
+        )}
+        {googleResult === 'failed' && (
+          <Alert
+            type="error"
+            showIcon
+            message="Não foi possível entrar com Google. Tente novamente."
+            className="form-alert"
+          />
+        )}
         <Form<LoginInput>
           layout="vertical"
           onFinish={(values) => signIn.mutate(values)}
