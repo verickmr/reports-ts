@@ -88,6 +88,8 @@ Use as senhas efetivas de `apps/api/.env` se tiver alterado os exemplos. O seed 
 
 O token aleatório fica em cookie `HttpOnly`, `SameSite=Strict`, restrito a `/api`, com validade de oito horas. Apenas seu hash SHA-256 é salvo em `sessions`. Em produção, o cookie também recebe `Secure`, portanto a aplicação deve ser servida por HTTPS. Senhas são verificadas com Argon2id. O `SessionGuard` protege as rotas de categorias e solicitações.
 
+O login Google é opcional. Configure `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` e `GOOGLE_REDIRECT_URI` em `apps/api/.env` e registre o mesmo URI no cliente OAuth do Google Cloud. No desenvolvimento, use `http://localhost:5173/api/auth/google/callback` e abra o frontend em `http://localhost:5173`; o proxy do Vite encaminha `/api` ao backend. Acesse `/api/auth/google/start` nessa origem para iniciar. O callback valida `state`, PKCE, assinatura e dados do ID token, cria ou recupera o usuário pelo `sub` e redireciona para `/` com a sessão ativa. Em produção, use `https://seu-dominio/api/auth/google/callback` na mesma origem do frontend. Sem essas três variáveis, a rota de início responde `503` e o login por senha segue disponível.
+
 ## Categorias
 
 `GET /api/categories` lista as categorias em ordem alfabética para usuários autenticados. Ele retorna `id`, `slug` e `name` conforme o contrato compartilhado em `packages/contracts`.
@@ -154,7 +156,7 @@ server {
 }
 ```
 
-Abra `https://portal.example.com` e entre com um usuário criado pelo seed. Mantenha a porta `3000` restrita ao proxy. O cookie de sessão recebe `Secure` quando a API roda com `NODE_ENV=production`, portanto o acesso pelo navegador precisa ser HTTPS. O Compose incluído no repositório executa apenas o PostgreSQL; a API e o servidor estático precisam ser mantidos pelo gerenciador de processos do ambiente escolhido. O login Google não está implementado e não exige configuração para esta entrega.
+Abra `https://portal.example.com` e entre com um usuário criado pelo seed. Mantenha a porta `3000` restrita ao proxy. O cookie de sessão recebe `Secure` quando a API roda com `NODE_ENV=production`, portanto o acesso pelo navegador precisa ser HTTPS. O Compose incluído no repositório executa apenas o PostgreSQL; a API e o servidor estático precisam ser mantidos pelo gerenciador de processos do ambiente escolhido. O login Google permanece opcional e exige as credenciais e o URI de retorno descritos acima.
 
 ## Verificações
 

@@ -9,8 +9,10 @@ import {
 
 test('prepara tentativa Google com state persistido e PKCE S256', async () => {
   const previousClientId = process.env.GOOGLE_CLIENT_ID;
+  const previousClientSecret = process.env.GOOGLE_CLIENT_SECRET;
   const previousRedirectUri = process.env.GOOGLE_REDIRECT_URI;
   process.env.GOOGLE_CLIENT_ID = 'test-client-id';
+  process.env.GOOGLE_CLIENT_SECRET = 'test-client-secret';
   process.env.GOOGLE_REDIRECT_URI =
     'http://127.0.0.1:3000/api/auth/google/callback';
   const attempts = [];
@@ -55,6 +57,9 @@ test('prepara tentativa Google com state persistido e PKCE S256', async () => {
   } finally {
     if (previousClientId === undefined) delete process.env.GOOGLE_CLIENT_ID;
     else process.env.GOOGLE_CLIENT_ID = previousClientId;
+    if (previousClientSecret === undefined)
+      delete process.env.GOOGLE_CLIENT_SECRET;
+    else process.env.GOOGLE_CLIENT_SECRET = previousClientSecret;
     if (previousRedirectUri === undefined)
       delete process.env.GOOGLE_REDIRECT_URI;
     else process.env.GOOGLE_REDIRECT_URI = previousRedirectUri;
@@ -63,8 +68,10 @@ test('prepara tentativa Google com state persistido e PKCE S256', async () => {
 
 test('recusa redirect HTTP remoto sem salvar tentativa', async () => {
   const previousClientId = process.env.GOOGLE_CLIENT_ID;
+  const previousClientSecret = process.env.GOOGLE_CLIENT_SECRET;
   const previousRedirectUri = process.env.GOOGLE_REDIRECT_URI;
   process.env.GOOGLE_CLIENT_ID = 'test-client-id';
+  process.env.GOOGLE_CLIENT_SECRET = 'test-client-secret';
   process.env.GOOGLE_REDIRECT_URI =
     'http://example.com/api/auth/google/callback';
   let saved = false;
@@ -84,6 +91,9 @@ test('recusa redirect HTTP remoto sem salvar tentativa', async () => {
   } finally {
     if (previousClientId === undefined) delete process.env.GOOGLE_CLIENT_ID;
     else process.env.GOOGLE_CLIENT_ID = previousClientId;
+    if (previousClientSecret === undefined)
+      delete process.env.GOOGLE_CLIENT_SECRET;
+    else process.env.GOOGLE_CLIENT_SECRET = previousClientSecret;
     if (previousRedirectUri === undefined)
       delete process.env.GOOGLE_REDIRECT_URI;
     else process.env.GOOGLE_REDIRECT_URI = previousRedirectUri;

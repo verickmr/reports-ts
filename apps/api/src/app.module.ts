@@ -3,6 +3,7 @@ import { HealthController } from './health.controller.js';
 import { AuthController } from './auth/auth.controller.js';
 import { AuthService } from './auth/auth.service.js';
 import { GoogleAuthService } from './auth/google-auth.service.js';
+import { GoogleAuthController } from './auth/google-auth.controller.js';
 import { GoogleAccountService } from './auth/google-account.service.js';
 import { GoogleTokenService } from './auth/google-token.service.js';
 import { SessionGuard } from './auth/session.guard.js';
@@ -15,6 +16,7 @@ import { RequestsService } from './requests/requests.service.js';
   controllers: [
     HealthController,
     AuthController,
+    GoogleAuthController,
     CategoriesController,
     RequestsController,
   ],

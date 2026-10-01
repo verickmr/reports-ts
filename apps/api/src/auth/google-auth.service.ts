@@ -23,8 +23,9 @@ export class GoogleAuthService {
 
   async beginLogin(): Promise<{ authorizationUrl: string; state: string }> {
     const clientId = process.env.GOOGLE_CLIENT_ID;
+    const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
     const redirectUri = process.env.GOOGLE_REDIRECT_URI;
-    if (!clientId || !redirectUri) {
+    if (!clientId || !clientSecret || !redirectUri) {
       throw new ServiceUnavailableException('Login Google não configurado.');
     }
 
@@ -37,6 +38,9 @@ export class GoogleAuthService {
     if (
       callback.hash ||
       callback.search ||
+      callback.username ||
+      callback.password ||
+      callback.pathname !== '/api/auth/google/callback' ||
       (callback.protocol !== 'https:' &&
         !(
           callback.protocol === 'http:' &&

@@ -6,7 +6,7 @@ import {
 
 export const googleStateCookieName = 'portal_google_state';
 
-type GoogleCookieResponse = {
+export type GoogleCookieResponse = {
   getHeader(name: string): number | string | string[] | undefined;
   setHeader(name: string, value: string | string[]): void;
 };

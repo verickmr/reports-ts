@@ -14,7 +14,7 @@ O banco usa PostgreSQL 16. A migration inicial está em `apps/api/prisma/migrati
 | `role`          | `UserRole`     | `REQUESTER` ou `AGENT`; padrão `REQUESTER`.            |
 | `created_at`    | TIMESTAMPTZ(3) | Preenchido ao criar o usuário.                         |
 
-O vínculo com Google usa o `sub` da identidade verificada. Ele só poderá ser associado a um usuário já cadastrado; não haverá criação automática de contas por este fluxo.
+O login Google usa o `sub` da identidade verificada como identificador estável. No primeiro acesso, cria um usuário `REQUESTER` com nome de exibição baseado no e-mail verificado e senha aleatória inacessível ao usuário; nos acessos seguintes, reutiliza a mesma conta. Um e-mail igual ao de uma conta local não vincula as contas automaticamente. O vínculo explícito (`LINK`) permanece reservado no esquema, sem rota ativa.
 
 ## `categories`
 
@@ -65,4 +65,4 @@ As duas chaves estrangeiras restringem a exclusão de usuários e categorias com
 | `expires_at`    | TIMESTAMPTZ(3)      | Prazo curto da tentativa, validado na API.                    |
 | `created_at`    | TIMESTAMPTZ(3)      | Data de criação.                                              |
 
-Uma tentativa de vínculo depende da sessão local e é removida se essa sessão for encerrada. A migração impede `LINK` sem sessão e `LOGIN` com sessão. O retorno do Google deverá consumir a tentativa uma única vez e rejeitar tentativas expiradas.
+Uma tentativa de vínculo depende da sessão local e é removida se essa sessão for encerrada. A migração impede `LINK` sem sessão e `LOGIN` com sessão. O retorno do Google consome tentativas `LOGIN` uma única vez e rejeita tentativas expiradas; o fluxo `LINK` ainda não está disponível.
