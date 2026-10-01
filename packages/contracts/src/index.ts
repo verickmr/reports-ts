@@ -104,6 +104,24 @@ export const listRequestsQuerySchema = z
 
 export type ListRequestsQuery = z.infer<typeof listRequestsQuerySchema>;
 
+export const paginatedListRequestsQuerySchema =
+  listRequestsQuerySchema.safeExtend({
+    page: z.coerce.number().int().min(1).max(100_000).default(1),
+    pageSize: z.coerce.number().int().min(1).max(100).default(20),
+  });
+
+export const paginatedRequestsSchema = z.object({
+  items: listedRequestsSchema,
+  page: z.number().int().positive(),
+  pageSize: z.number().int().min(1).max(100),
+  total: z.number().int().nonnegative(),
+});
+
+export type PaginatedListRequestsQuery = z.infer<
+  typeof paginatedListRequestsQuerySchema
+>;
+export type PaginatedRequests = z.infer<typeof paginatedRequestsSchema>;
+
 export const requestIdSchema = z
   .string()
   .regex(/^[1-9]\d*$/)

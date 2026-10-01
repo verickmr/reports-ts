@@ -4,6 +4,8 @@ import {
   createRequestInputSchema,
   listRequestsQuerySchema,
   loginInputSchema,
+  paginatedListRequestsQuerySchema,
+  paginatedRequestsSchema,
   requestIdSchema,
   requestSummarySchema,
   updateRequestInputSchema,
@@ -79,6 +81,45 @@ test('filtros convertem categoria e rejeitam períodos invertidos', () => {
   assert.equal(
     listRequestsQuerySchema.safeParse({ unknown: 'x' }).success,
     false,
+  );
+});
+
+test('paginação mantém filtros, aplica padrões e limita tamanho da página', () => {
+  assert.deepEqual(paginatedListRequestsQuerySchema.parse({}), {
+    page: 1,
+    pageSize: 20,
+  });
+  assert.deepEqual(
+    paginatedListRequestsQuerySchema.parse({
+      categoryId: '2',
+      page: '3',
+      pageSize: '50',
+    }),
+    { categoryId: 2, page: 3, pageSize: 50 },
+  );
+  for (const query of [
+    { page: '0' },
+    { page: '1.5' },
+    { pageSize: '101' },
+    {
+      createdFrom: '2026-10-02T00:00:00.000Z',
+      createdBefore: '2026-10-01T00:00:00.000Z',
+    },
+    { unknown: 'x' },
+  ]) {
+    assert.equal(
+      paginatedListRequestsQuerySchema.safeParse(query).success,
+      false,
+    );
+  }
+  assert.deepEqual(
+    paginatedRequestsSchema.parse({
+      items: [],
+      page: 1,
+      pageSize: 20,
+      total: 0,
+    }),
+    { items: [], page: 1, pageSize: 20, total: 0 },
   );
 });
 
