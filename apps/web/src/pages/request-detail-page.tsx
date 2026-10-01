@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { requestIdSchema } from '@portal/contracts';
 import {
   Alert,
@@ -7,11 +7,13 @@ import {
   Descriptions,
   Divider,
   Layout,
+  Popconfirm,
+  Space,
   Tag,
   Typography,
 } from 'antd';
-import { Link, useParams } from 'react-router-dom';
-import { getRequestDetail } from '../requests/requests.api';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { deleteRequest, getRequestDetail } from '../requests/requests.api';
 import { statusColors, statusLabels } from '../requests/request-status';
 import { RequestStatusEditor } from '../requests/request-status-editor';
 
@@ -21,10 +23,21 @@ const dateFormatter = new Intl.DateTimeFormat('pt-BR', {
 });
 
 function RequestDetailContent({ id }: { id: number }) {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const detail = useQuery({
     queryKey: ['request', id],
     queryFn: () => getRequestDetail(id),
     retry: false,
+  });
+  const remove = useMutation({
+    mutationFn: () => deleteRequest(id),
+    onSuccess: () => {
+      queryClient.removeQueries({ queryKey: ['request', id] });
+      void queryClient.invalidateQueries({ queryKey: ['requests'] });
+      navigate('/');
+    },
+    onError: () => void detail.refetch(),
   });
 
   return (
@@ -32,12 +45,34 @@ function RequestDetailContent({ id }: { id: number }) {
       title={`Solicitação #${id}`}
       extra={
         detail.isSuccess && detail.data.status === 'OPEN' ? (
-          <Link to={`/requests/${id}/edit`}>Editar solicitação</Link>
+          <Space>
+            <Link to={`/requests/${id}/edit`}>Editar solicitação</Link>
+            <Popconfirm
+              title="Excluir solicitação?"
+              description="Esta ação não pode ser desfeita."
+              okText="Excluir"
+              cancelText="Cancelar"
+              okButtonProps={{ danger: true, loading: remove.isPending }}
+              onConfirm={() => remove.mutate()}
+            >
+              <Button danger disabled={remove.isPending}>
+                Excluir
+              </Button>
+            </Popconfirm>
+          </Space>
         ) : null
       }
       loading={detail.isPending}
       className="detail-card"
     >
+      {remove.isError && (
+        <Alert
+          type="error"
+          showIcon
+          message={remove.error.message}
+          className="form-alert"
+        />
+      )}
       {detail.isError && (
         <Alert
           type="error"

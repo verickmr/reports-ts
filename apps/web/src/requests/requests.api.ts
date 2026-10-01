@@ -15,6 +15,24 @@ import {
   type UpdateRequestInput,
 } from '@portal/contracts';
 
+export async function deleteRequest(id: number): Promise<void> {
+  const response = await fetch(`/api/requests/${id}`, { method: 'DELETE' });
+  if (response.status === 401) {
+    throw new Error('Sua sessão expirou. Atualize a página e entre novamente.');
+  }
+  if (response.status === 404) {
+    throw new Error('Solicitação não encontrada.');
+  }
+  if (response.status === 409) {
+    throw new Error(
+      'Esta solicitação deixou de estar aberta. Atualize os detalhes.',
+    );
+  }
+  if (!response.ok) {
+    throw new Error('Não foi possível excluir a solicitação.');
+  }
+}
+
 export async function updateRequest(
   id: number,
   input: UpdateRequestInput,
