@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { CreateRequestInput } from '@portal/contracts';
 import { Alert, Button, Card, Form, Layout, Space, Typography } from 'antd';
 import { Link } from 'react-router-dom';
@@ -11,13 +11,17 @@ import { RequestFormFields } from '../requests/request-form-fields';
 
 export function CreateRequestPage() {
   const [form] = Form.useForm<CreateRequestInput>();
+  const queryClient = useQueryClient();
   const categories = useQuery({
     queryKey: categoriesQueryKey,
     queryFn: listCategories,
   });
   const creation = useMutation({
     mutationFn: createRequest,
-    onSuccess: () => form.resetFields(),
+    onSuccess: () => {
+      form.resetFields();
+      void queryClient.invalidateQueries({ queryKey: ['requests'] });
+    },
   });
 
   return (

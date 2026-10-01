@@ -4,6 +4,7 @@ import {
   listRequestsQuerySchema,
   listedRequestsSchema,
   requestDetailSchema,
+  requestSummarySchema,
   updateRequestStatusSchema,
   updateRequestInputSchema,
   type CreatedRequest,
@@ -11,9 +12,21 @@ import {
   type ListRequestsQuery,
   type ListedRequests,
   type RequestDetail,
+  type RequestSummary,
   type UpdateRequestStatusInput,
   type UpdateRequestInput,
 } from '@portal/contracts';
+
+export async function getRequestSummary(): Promise<RequestSummary> {
+  const response = await fetch('/api/requests/summary');
+  if (response.status === 401) {
+    throw new Error('Sua sessão expirou. Atualize a página e entre novamente.');
+  }
+  if (!response.ok) {
+    throw new Error('Não foi possível carregar o resumo das solicitações.');
+  }
+  return requestSummarySchema.parse(await response.json());
+}
 
 export async function deleteRequest(id: number): Promise<void> {
   const response = await fetch(`/api/requests/${id}`, { method: 'DELETE' });

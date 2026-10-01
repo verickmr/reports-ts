@@ -10,6 +10,7 @@ import {
   Row,
   Select,
   Space,
+  Statistic,
   Switch,
   Table,
   Tag,
@@ -30,7 +31,7 @@ import {
   categoriesQueryKey,
   listCategories,
 } from '../categories/categories.api';
-import { listRequests } from '../requests/requests.api';
+import { getRequestSummary, listRequests } from '../requests/requests.api';
 import { statusColors, statusLabels } from '../requests/request-status';
 import { useViewPreferences } from '../state/view-preferences';
 
@@ -113,6 +114,11 @@ export function HomePage() {
     queryFn: () => listRequests(filters),
     retry: false,
   });
+  const summary = useQuery({
+    queryKey: ['requests', 'summary'],
+    queryFn: getRequestSummary,
+    retry: false,
+  });
 
   function applyFilters(values: RequestFilterForm) {
     if (values.fromDate && values.toDate && values.fromDate > values.toDate) {
@@ -179,6 +185,46 @@ export function HomePage() {
             className="form-alert"
           />
         )}
+        <Card
+          title="Resumo das solicitações"
+          loading={summary.isPending}
+          className="requests-card"
+        >
+          {summary.isError && (
+            <Alert
+              type="error"
+              showIcon
+              message={summary.error.message}
+              action={
+                <Button onClick={() => void summary.refetch()}>
+                  Tentar novamente
+                </Button>
+              }
+            />
+          )}
+          {summary.isSuccess && (
+            <Row gutter={[16, 16]}>
+              <Col xs={12} md={6}>
+                <Statistic title="Total" value={summary.data.total} />
+              </Col>
+              <Col xs={12} md={6}>
+                <Statistic title="Abertas" value={summary.data.byStatus.OPEN} />
+              </Col>
+              <Col xs={12} md={6}>
+                <Statistic
+                  title="Em andamento"
+                  value={summary.data.byStatus.IN_PROGRESS}
+                />
+              </Col>
+              <Col xs={12} md={6}>
+                <Statistic
+                  title="Concluídas"
+                  value={summary.data.byStatus.COMPLETED}
+                />
+              </Col>
+            </Row>
+          )}
+        </Card>
         <Card title="Solicitações" className="requests-card">
           {categories.isError && (
             <Alert
