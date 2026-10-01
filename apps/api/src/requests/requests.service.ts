@@ -116,6 +116,22 @@ export class RequestsService {
     return this.detail(id);
   }
 
+  async remove(id: number): Promise<void> {
+    const deleted = await this.prisma.request.deleteMany({
+      where: { id, status: 'OPEN' },
+    });
+    if (deleted.count === 0) {
+      const existing = await this.prisma.request.findUnique({
+        where: { id },
+        select: { id: true },
+      });
+      if (!existing) throw new NotFoundException('Solicitação não encontrada.');
+      throw new ConflictException(
+        'Apenas solicitações abertas podem ser excluídas.',
+      );
+    }
+  }
+
   async create(
     input: CreateRequestInput,
     requesterId: string,

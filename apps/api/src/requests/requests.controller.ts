@@ -2,7 +2,10 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   Patch,
   Post,
@@ -75,6 +78,12 @@ export class RequestsController {
       );
     }
     return this.requests.update(parseRequestId(id), parsed.data);
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  remove(@Param('id') id: string): Promise<void> {
+    return this.requests.remove(parseRequestId(id));
   }
 
   @Post()

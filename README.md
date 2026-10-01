@@ -52,6 +52,8 @@ Filtros opcionais em `GET /api/requests`: `title` (busca parcial sem diferenciar
 
 `PUT /api/requests/:id` recebe título, descrição e categoria completos. A alteração é permitida apenas enquanto a solicitação está `OPEN`; responde `409` quando já está em atendimento ou concluída.
 
+`DELETE /api/requests/:id` exclui a solicitação apenas se ainda estiver `OPEN` e responde `204`. Para uma solicitação em atendimento ou concluída, responde `409`.
+
 ## Verificações
 
 ```sh
