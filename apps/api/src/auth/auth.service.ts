@@ -23,6 +23,17 @@ export class AuthService {
       throw new UnauthorizedException(invalidCredentials);
     }
 
+    return this.createSession({
+      id: user.id,
+      username: user.username,
+      name: user.name,
+      role: user.role,
+    });
+  }
+
+  async createSession(
+    user: AuthUser,
+  ): Promise<{ token: string; user: AuthUser }> {
     const token = randomBytes(32).toString('base64url');
     await this.prisma.session.create({
       data: {
@@ -31,15 +42,7 @@ export class AuthService {
         expiresAt: new Date(Date.now() + sessionDurationMs),
       },
     });
-    return {
-      token,
-      user: {
-        id: user.id,
-        username: user.username,
-        name: user.name,
-        role: user.role,
-      },
-    };
+    return { token, user };
   }
 
   async getUser(token: string): Promise<AuthUser | null> {
