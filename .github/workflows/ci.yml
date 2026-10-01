@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgresql://portal:portal_ci@127.0.0.1:5432/portal_solicitacoes?schema=public
+      DEMO_REQUESTER_PASSWORD: solicitante_ci_2026
+      DEMO_AGENT_PASSWORD: atendente_ci_2026
+      NODE_ENV: test
+      PORT: 3000
+    services:
+      db:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: portal_solicitacoes
+          POSTGRES_USER: portal
+          POSTGRES_PASSWORD: portal_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U portal -d portal_solicitacoes"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/setup@v3
+        with:
+          runtime: node@22
+          require-lockfile: true
+
+      - name: Build and static checks
+        run: |
+          pnpm build
+          pnpm typecheck
+          pnpm lint
+          pnpm format:check
+          pnpm test
+
+      - name: Prepare database
+        run: |
+          pnpm --filter @portal/api db:migrate:deploy
+          pnpm --filter @portal/api db:seed
+
+      - name: HTTP integration test
+        run: |
+          node apps/api/dist/main.js > api.log 2>&1 &
+          api_pid=$!
+          trap 'kill "$api_pid" 2>/dev/null || true' EXIT
+          ready=0
+          for attempt in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:3000/api/health > /dev/null; then
+              ready=1
+              break
+            fi
+            sleep 1
+          done
+          if [ "$ready" -ne 1 ]; then
+            cat api.log
+            exit 1
+          fi
+          pnpm --filter @portal/api test:integration

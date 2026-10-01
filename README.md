@@ -172,6 +172,8 @@ pnpm --filter @portal/api db:status
 
 Para verificar o fluxo HTTP, inicie a API com um **banco local descartável** já migrado e populado pelo seed e execute `pnpm --filter @portal/api test:integration` em outro terminal. O teste usa `solicitante` e a senha `DEMO_REQUESTER_PASSWORD` de `apps/api/.env`, cria uma solicitação temporária e tenta removê-la ao final. Se necessário, defina `API_TEST_BASE_URL` (padrão `http://127.0.0.1:3000/api`), `API_TEST_USERNAME` e `API_TEST_PASSWORD` no ambiente do comando. Esse teste não entra no `pnpm test` geral porque exige uma API e um banco em execução.
 
+O workflow [CI](.github/workflows/ci.yml) executa esses checks em push e pull request com PostgreSQL temporário e sem credenciais externas. Ele passa a funcionar quando este repositório for publicado no GitHub.
+
 ## Estrutura
 
 - `apps/web`: React, Vite, Ant Design, TanStack Query e Zustand.
