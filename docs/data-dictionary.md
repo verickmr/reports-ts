@@ -51,7 +51,7 @@ As duas chaves estrangeiras restringem a exclusão de usuários e categorias com
 | `expires_at` | TIMESTAMPTZ(3) | Limite de validade da sessão.                                           |
 | `created_at` | TIMESTAMPTZ(3) | Data de criação.                                                        |
 
-Índices em `user_id` e `expires_at` apoiam consulta e limpeza de sessões. O token em texto não é persistido no banco; `token_hash` guarda seu SHA-256. A API rejeita sessões após `expires_at` e remove a sessão no logout.
+Índices em `user_id` e `expires_at` apoiam consulta e limpeza de sessões. O token em texto não é persistido no banco; `token_hash` guarda seu SHA-256. A API rejeita sessões após `expires_at`, remove sessões vencidas ao criar uma nova e remove a sessão atual no logout.
 
 ## `google_auth_attempts`
 

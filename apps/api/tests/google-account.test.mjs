@@ -28,6 +28,9 @@ test('cria solicitante pelo sub sem assumir conta local com e-mail igual', async
       },
     },
     session: {
+      async deleteMany() {
+        return { count: 0 };
+      },
       async create({ data }) {
         sessions.push(data);
       },
@@ -81,6 +84,9 @@ test('preserva perfil de conta local já vinculada ao sub', async () => {
       },
     },
     session: {
+      async deleteMany() {
+        return { count: 0 };
+      },
       async create({ data }) {
         assert.equal(data.userId, agent.id);
       },

@@ -34,12 +34,16 @@ export class AuthService {
   async createSession(
     user: AuthUser,
   ): Promise<{ token: string; user: AuthUser }> {
+    const now = new Date();
+    await this.prisma.session.deleteMany({
+      where: { expiresAt: { lte: now } },
+    });
     const token = randomBytes(32).toString('base64url');
     await this.prisma.session.create({
       data: {
         tokenHash: hashToken(token),
         userId: user.id,
-        expiresAt: new Date(Date.now() + sessionDurationMs),
+        expiresAt: new Date(now.getTime() + sessionDurationMs),
       },
     });
     return { token, user };
