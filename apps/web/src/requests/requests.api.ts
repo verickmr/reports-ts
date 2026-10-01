@@ -4,12 +4,38 @@ import {
   listRequestsQuerySchema,
   listedRequestsSchema,
   requestDetailSchema,
+  updateRequestStatusSchema,
   type CreatedRequest,
   type CreateRequestInput,
   type ListRequestsQuery,
   type ListedRequests,
   type RequestDetail,
+  type UpdateRequestStatusInput,
 } from '@portal/contracts';
+
+export async function updateRequestStatus(
+  id: number,
+  input: UpdateRequestStatusInput,
+): Promise<RequestDetail> {
+  const response = await fetch(`/api/requests/${id}/status`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(updateRequestStatusSchema.parse(input)),
+  });
+  if (response.status === 400) {
+    throw new Error('Selecione um status válido.');
+  }
+  if (response.status === 401) {
+    throw new Error('Sua sessão expirou. Atualize a página e entre novamente.');
+  }
+  if (response.status === 404) {
+    throw new Error('Solicitação não encontrada.');
+  }
+  if (!response.ok) {
+    throw new Error('Não foi possível atualizar o status.');
+  }
+  return requestDetailSchema.parse(await response.json());
+}
 
 export async function getRequestDetail(id: number): Promise<RequestDetail> {
   const response = await fetch(`/api/requests/${id}`);

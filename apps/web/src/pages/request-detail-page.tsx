@@ -5,6 +5,7 @@ import {
   Button,
   Card,
   Descriptions,
+  Divider,
   Layout,
   Tag,
   Typography,
@@ -12,6 +13,7 @@ import {
 import { Link, useParams } from 'react-router-dom';
 import { getRequestDetail } from '../requests/requests.api';
 import { statusColors, statusLabels } from '../requests/request-status';
+import { RequestStatusEditor } from '../requests/request-status-editor';
 
 const dateFormatter = new Intl.DateTimeFormat('pt-BR', {
   dateStyle: 'short',
@@ -44,33 +46,39 @@ function RequestDetailContent({ id }: { id: number }) {
         />
       )}
       {detail.isSuccess && (
-        <Descriptions bordered column={1}>
-          <Descriptions.Item label="Título">
-            {detail.data.title}
-          </Descriptions.Item>
-          <Descriptions.Item label="Descrição">
-            <Typography.Paragraph style={{ whiteSpace: 'pre-wrap', margin: 0 }}>
-              {detail.data.description}
-            </Typography.Paragraph>
-          </Descriptions.Item>
-          <Descriptions.Item label="Categoria">
-            {detail.data.category.name}
-          </Descriptions.Item>
-          <Descriptions.Item label="Solicitante">
-            {detail.data.requester.name}
-          </Descriptions.Item>
-          <Descriptions.Item label="Status">
-            <Tag color={statusColors[detail.data.status]}>
-              {statusLabels[detail.data.status]}
-            </Tag>
-          </Descriptions.Item>
-          <Descriptions.Item label="Abertura">
-            {dateFormatter.format(new Date(detail.data.createdAt))}
-          </Descriptions.Item>
-          <Descriptions.Item label="Última atualização">
-            {dateFormatter.format(new Date(detail.data.updatedAt))}
-          </Descriptions.Item>
-        </Descriptions>
+        <>
+          <Descriptions bordered column={1}>
+            <Descriptions.Item label="Título">
+              {detail.data.title}
+            </Descriptions.Item>
+            <Descriptions.Item label="Descrição">
+              <Typography.Paragraph
+                style={{ whiteSpace: 'pre-wrap', margin: 0 }}
+              >
+                {detail.data.description}
+              </Typography.Paragraph>
+            </Descriptions.Item>
+            <Descriptions.Item label="Categoria">
+              {detail.data.category.name}
+            </Descriptions.Item>
+            <Descriptions.Item label="Solicitante">
+              {detail.data.requester.name}
+            </Descriptions.Item>
+            <Descriptions.Item label="Status">
+              <Tag color={statusColors[detail.data.status]}>
+                {statusLabels[detail.data.status]}
+              </Tag>
+            </Descriptions.Item>
+            <Descriptions.Item label="Abertura">
+              {dateFormatter.format(new Date(detail.data.createdAt))}
+            </Descriptions.Item>
+            <Descriptions.Item label="Última atualização">
+              {dateFormatter.format(new Date(detail.data.updatedAt))}
+            </Descriptions.Item>
+          </Descriptions>
+          <Divider />
+          <RequestStatusEditor request={detail.data} />
+        </>
       )}
     </Card>
   );
