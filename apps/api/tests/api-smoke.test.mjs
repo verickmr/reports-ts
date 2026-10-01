@@ -84,6 +84,50 @@ test('fluxo HTTP de uma solicitação autenticada', async () => {
       (await list.json()).map((item) => item.id),
       [requestId],
     );
+    const secondCreation = await api(
+      '/requests',
+      jsonOptions('POST', {
+        title: `${title} segunda`,
+        description: 'Segunda solicitação temporária para testar páginas.',
+        categoryId: categories[0].id,
+      }),
+    );
+    assert.equal(secondCreation.status, 201);
+    const secondRequestId = (await secondCreation.json()).id;
+    try {
+      const pagedPath = `/requests/page?title=${encodeURIComponent(title)}&pageSize=1`;
+      const firstPage = await api(pagedPath);
+      assert.equal(firstPage.status, 200);
+      const firstPageData = await firstPage.json();
+      assert.deepEqual(
+        firstPageData.items.map((item) => item.id),
+        [secondRequestId],
+      );
+      assert.deepEqual(
+        {
+          page: firstPageData.page,
+          pageSize: firstPageData.pageSize,
+          total: firstPageData.total,
+        },
+        { page: 1, pageSize: 1, total: 2 },
+      );
+      const secondPage = await api(`${pagedPath}&page=2`);
+      assert.equal(secondPage.status, 200);
+      assert.deepEqual(
+        (await secondPage.json()).items.map((item) => item.id),
+        [requestId],
+      );
+      const thirdPage = await api(`${pagedPath}&page=3`);
+      assert.equal(thirdPage.status, 200);
+      assert.deepEqual((await thirdPage.json()).items, []);
+      assert.equal((await api('/requests/page?pageSize=101')).status, 400);
+    } finally {
+      assert.equal(
+        (await api(`/requests/${secondRequestId}`, { method: 'DELETE' }))
+          .status,
+        204,
+      );
+    }
     const detail = await api(`/requests/${requestId}`);
     assert.equal(detail.status, 200);
     assert.equal((await detail.json()).title, title);

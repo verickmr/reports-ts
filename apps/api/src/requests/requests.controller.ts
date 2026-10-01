@@ -17,11 +17,13 @@ import {
 import {
   createRequestInputSchema,
   listRequestsQuerySchema,
+  paginatedListRequestsQuerySchema,
   requestIdSchema,
   updateRequestStatusSchema,
   updateRequestInputSchema,
   type CreatedRequest,
   type ListedRequests,
+  type PaginatedRequests,
   type RequestDetail,
   type RequestSummary,
 } from '@portal/contracts';
@@ -53,6 +55,15 @@ export class RequestsController {
       throw new BadRequestException('Filtros inválidos.');
     }
     return this.requests.list(parsed.data);
+  }
+
+  @Get('page')
+  listPage(@Query() query: unknown): Promise<PaginatedRequests> {
+    const parsed = paginatedListRequestsQuerySchema.safeParse(query);
+    if (!parsed.success) {
+      throw new BadRequestException('Filtros de paginação inválidos.');
+    }
+    return this.requests.listPage(parsed.data);
   }
 
   @Get(':id')

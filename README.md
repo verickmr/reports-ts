@@ -102,6 +102,8 @@ O login Google é opcional. Configure `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`
 
 Filtros opcionais em `GET /api/requests`: `title` (busca parcial sem diferenciar maiúsculas), `categoryId`, `status`, `createdFrom` (início inclusivo) e `createdBefore` (fim exclusivo). As datas usam ISO 8601 em UTC, por exemplo `2026-09-30T00:00:00.000Z`.
 
+`GET /api/requests/page` aceita os mesmos filtros e devolve `{ items, page, pageSize, total }`. `page` começa em 1 (padrão 1) e `pageSize` vai de 1 a 100 (padrão 20). A ordenação usa data de abertura e código decrescentes para desempatar. A rota antiga permanece disponível para a interface atual.
+
 `GET /api/requests/:id` mostra os detalhes da solicitação, incluindo descrição e última atualização. Um código inválido responde `400`; uma solicitação inexistente responde `404`.
 
 `PATCH /api/requests/:id/status` recebe `{ "status": "OPEN" | "IN_PROGRESS" | "COMPLETED" }`, exige sessão ativa e devolve os detalhes atualizados. O enunciado não restringe a ordem das mudanças de status.

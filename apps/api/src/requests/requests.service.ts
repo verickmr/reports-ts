@@ -9,12 +9,15 @@ import type {
   CreatedRequest,
   ListRequestsQuery,
   ListedRequests,
+  PaginatedListRequestsQuery,
+  PaginatedRequests,
   RequestDetail,
   RequestSummary,
   UpdateRequestStatusInput,
   UpdateRequestInput,
 } from '@portal/contracts';
 import { PrismaService } from '../database/prisma.service.js';
+import type { Prisma } from '../generated/prisma/client.js';
 
 @Injectable()
 export class RequestsService {
@@ -40,25 +43,52 @@ export class RequestsService {
   }
 
   async list(filters: ListRequestsQuery): Promise<ListedRequests> {
-    const requests = await this.prisma.request.findMany({
-      where: {
-        title: filters.title
-          ? { contains: filters.title, mode: 'insensitive' }
+    return this.findListed(this.listWhere(filters));
+  }
+
+  async listPage(
+    filters: PaginatedListRequestsQuery,
+  ): Promise<PaginatedRequests> {
+    const where = this.listWhere(filters);
+    const [items, total] = await Promise.all([
+      this.findListed(where, {
+        skip: (filters.page - 1) * filters.pageSize,
+        take: filters.pageSize,
+      }),
+      this.prisma.request.count({ where }),
+    ]);
+    return { items, page: filters.page, pageSize: filters.pageSize, total };
+  }
+
+  private listWhere(filters: ListRequestsQuery): Prisma.RequestWhereInput {
+    return {
+      title: filters.title
+        ? { contains: filters.title, mode: 'insensitive' }
+        : undefined,
+      categoryId: filters.categoryId,
+      status: filters.status,
+      createdAt:
+        filters.createdFrom || filters.createdBefore
+          ? {
+              gte: filters.createdFrom
+                ? new Date(filters.createdFrom)
+                : undefined,
+              lt: filters.createdBefore
+                ? new Date(filters.createdBefore)
+                : undefined,
+            }
           : undefined,
-        categoryId: filters.categoryId,
-        status: filters.status,
-        createdAt:
-          filters.createdFrom || filters.createdBefore
-            ? {
-                gte: filters.createdFrom
-                  ? new Date(filters.createdFrom)
-                  : undefined,
-                lt: filters.createdBefore
-                  ? new Date(filters.createdBefore)
-                  : undefined,
-              }
-            : undefined,
-      },
+    };
+  }
+
+  private async findListed(
+    where: Prisma.RequestWhereInput,
+    pagination?: { skip: number; take: number },
+  ): Promise<ListedRequests> {
+    const requests = await this.prisma.request.findMany({
+      where,
+      skip: pagination?.skip,
+      take: pagination?.take,
       select: {
         id: true,
         title: true,
