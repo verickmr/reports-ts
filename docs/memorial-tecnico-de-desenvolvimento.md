@@ -27,7 +27,7 @@ O login implementado usa usuário e senha. A modelagem inclui campos para uma fu
 
 Dependências de suporte incluem React DOM (renderização), `@vitejs/plugin-react` (integração do React com Vite), React Router DOM (implementação das rotas no navegador), `@nestjs/platform-express`, RxJS e `reflect-metadata` (execução do NestJS), `@prisma/client` e `@prisma/adapter-pg` (cliente e conexão PostgreSQL), `dotenv` (leitura das variáveis locais), `tsc-watch` (reinício da API no desenvolvimento), `typescript-eslint`, `@eslint/js`, `globals` e pacotes `@types` (análise estática e tipos). São dependências de integração ou desenvolvimento; suas versões exatas estão nos `package.json` e no lockfile.
 
-Os testes versionados dos contratos usam `node:test` e `node:assert/strict`, sem biblioteca externa de testes. Para a verificação HTTP local, usei PGlite e `@electric-sql/pglite-socket` em um script temporário fora do repositório. Não há serviço cloud externo.
+Os testes versionados usam `node:test` e `node:assert/strict`, sem biblioteca externa de testes. O teste HTTP usa também o `fetch` nativo do Node.js e uma API já iniciada. Para executá-lo localmente durante o desenvolvimento, usei PGlite e `@electric-sql/pglite-socket` em um iniciador temporário fora do repositório. Não há serviço cloud externo.
 
 ## 3. Arquitetura e organização das camadas
 
@@ -54,7 +54,7 @@ O campo `role` já existe no usuário, porém ainda não limita operações: qua
 
 ## 6. Verificação e análise crítica
 
-Foram executados compilação TypeScript, lint, formatação e build da interface durante o desenvolvimento. O pacote de contratos tem testes automatizados versionados para validação de entradas, filtros, códigos, status e resumo. O fluxo HTTP foi verificado localmente com um banco PostgreSQL compatível em memória, cobrindo login, sessão, criação, filtros, edição, exclusão, status e dashboard. Esse script de integração ficou fora do repositório; antes de uso corporativo, devem ser adicionados testes de integração versionados e CI.
+Foram executados compilação TypeScript, lint, formatação e build da interface durante o desenvolvimento. O pacote de contratos tem testes automatizados versionados para validação de entradas, filtros, códigos, status e resumo. Há também um teste HTTP versionado para login, sessão, criação, filtros, edição, exclusão, status e dashboard, executado localmente com um banco PostgreSQL compatível em memória. O iniciador desse banco de teste ficou fora do repositório; o teste entregue requer uma API e um banco descartável já iniciados. Antes de uso corporativo, ainda devem ser adicionados provisionamento automático do ambiente de testes e CI.
 
 As principais limitações são: a listagem não tem paginação no servidor; não há trilha de auditoria das mudanças de status; não há recuperação de senha nem políticas de permissão por papel; o fluxo Google é apenas uma preparação de banco; e o Compose executa apenas PostgreSQL. Para produção, eu adicionaria paginação, auditoria, testes e pipeline de implantação, política de retenção/limpeza de sessões, proteção de login contra tentativas excessivas e uma análise de CSRF adequada ao domínio e à forma de hospedagem escolhidos. Também serviria frontend e API sob HTTPS e validaria o deploy em ambiente semelhante ao de produção.
 
