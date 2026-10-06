@@ -376,6 +376,16 @@ body {
   border-radius: 12px;
   background: #fff;
   box-shadow: 0 3px 12px rgb(25 46 89 / 4%);
+  cursor: grab;
+}
+
+.board-card:active {
+  cursor: grabbing;
+}
+
+.board-card:focus-visible {
+  outline: 2px solid #3155b5;
+  outline-offset: 2px;
 }
 
 .board-card-heading,
@@ -394,22 +404,9 @@ body {
 
 .board-drag-handle {
   padding: 0 5px;
-  border: 0;
-  border-radius: 6px;
-  background: transparent;
   color: #667591;
   font-size: 18px;
   line-height: 1.2;
-  cursor: grab;
-}
-
-.board-drag-handle:focus-visible {
-  outline: 2px solid #3155b5;
-  outline-offset: 2px;
-}
-
-.board-drag-handle:active {
-  cursor: grabbing;
 }
 
 .board-card-title {

@@ -141,20 +141,20 @@ export function RequestBoard({ filters }: { filters: ListRequestsQuery }) {
                             <div
                               ref={drag.innerRef}
                               {...drag.draggableProps}
+                              {...drag.dragHandleProps}
+                              aria-label={`Mover solicitação #${request.id}`}
                               className="board-card"
                             >
                               <div className="board-card-heading">
                                 <span className="board-card-code">
                                   #{request.id}
                                 </span>
-                                <button
-                                  type="button"
-                                  {...drag.dragHandleProps}
-                                  aria-label={`Mover solicitação #${request.id}`}
+                                <span
                                   className="board-drag-handle"
+                                  aria-hidden="true"
                                 >
                                   ⋮⋮
-                                </button>
+                                </span>
                               </div>
                               <Link
                                 to={`/requests/${request.id}`}
