@@ -11,7 +11,6 @@ import {
   Select,
   Space,
   Statistic,
-  Switch,
   Table,
   Tag,
   Typography,
@@ -35,7 +34,7 @@ import {
 import { getRequestSummary, listRequests } from '../requests/requests.api';
 import { statusColors, statusLabels } from '../requests/request-status';
 import { CreateRequestModal } from '../requests/create-request-modal';
-import { useViewPreferences } from '../state/view-preferences';
+import { useThemePreference } from '../state/theme-preference';
 
 type ListedRequest = ListedRequests[number];
 type RequestFilterForm = {
@@ -91,8 +90,8 @@ export function HomePage() {
   const [pageSize, setPageSize] = useState(10);
   const [createOpen, setCreateOpen] = useState(false);
   const [createdRequestId, setCreatedRequestId] = useState<number | null>(null);
-  const compact = useViewPreferences((state) => state.compact);
-  const setCompact = useViewPreferences((state) => state.setCompact);
+  const mode = useThemePreference((state) => state.mode);
+  const toggleMode = useThemePreference((state) => state.toggleMode);
   const queryClient = useQueryClient();
   const session = useSession();
   const signOut = useMutation({
@@ -147,38 +146,53 @@ export function HomePage() {
 
   return (
     <Layout className="page">
-      <Layout.Content className={compact ? 'content compact' : 'content'}>
-        <Flex justify="space-between" align="center" wrap="wrap" gap="middle">
-          <div>
-            <Typography.Title level={2}>
-              Portal de Solicitações Internas
-            </Typography.Title>
-            <Typography.Text>
-              Olá, {session.data?.user.name} (
-              {session.data?.user.role === 'AGENT'
-                ? 'atendente'
-                : 'solicitante'}
-              ).
-            </Typography.Text>
+      <header className="site-header">
+        <div className="site-header-inner">
+          <div className="brand">
+            <span className="brand-mark" aria-hidden="true">
+              S
+            </span>
+            <span>Solicitações</span>
           </div>
-          <Space>
-            <Button type="primary" onClick={() => setCreateOpen(true)}>
-              Nova solicitação
+          <Flex align="center" gap="middle">
+            <span className="user-name">{session.data?.user.name}</span>
+            <Button
+              onClick={toggleMode}
+              aria-label={
+                mode === 'dark' ? 'Ativar modo claro' : 'Ativar modo escuro'
+              }
+            >
+              {mode === 'dark' ? 'Modo claro' : 'Modo escuro'}
             </Button>
-            <Typography.Text>Visualização compacta</Typography.Text>
-            <Switch
-              checked={compact}
-              onChange={setCompact}
-              aria-label="Visualização compacta"
-            />
             <Button
               onClick={() => signOut.mutate()}
               loading={signOut.isPending}
             >
               Sair
             </Button>
-          </Space>
-        </Flex>
+          </Flex>
+        </div>
+      </header>
+      <Layout.Content className="content">
+        <div className="page-heading">
+          <div>
+            <Typography.Text className="eyebrow">
+              PAINEL DE ACOMPANHAMENTO
+            </Typography.Text>
+            <Typography.Title level={1}>Solicitações</Typography.Title>
+            <Typography.Paragraph>
+              Acompanhe demandas, consulte o andamento e registre uma nova
+              solicitação.
+            </Typography.Paragraph>
+          </div>
+          <Button
+            type="primary"
+            size="large"
+            onClick={() => setCreateOpen(true)}
+          >
+            Nova solicitação
+          </Button>
+        </div>
         {signOut.isError && (
           <Alert
             type="error"
@@ -195,18 +209,13 @@ export function HomePage() {
             onClose={() => setCreatedRequestId(null)}
             message={`Solicitação #${createdRequestId} criada com sucesso.`}
             description={
-              <Link to={`/requests/${createdRequestId}`}>
-                Ver solicitação
-              </Link>
+              <Link to={`/requests/${createdRequestId}`}>Ver solicitação</Link>
             }
             className="requests-card"
           />
         )}
-        <Card
-          title="Resumo das solicitações"
-          loading={summary.isPending}
-          className="requests-card"
-        >
+        <section className="overview" aria-label="Resumo das solicitações">
+          <Typography.Title level={4}>Visão geral</Typography.Title>
           {summary.isError && (
             <Alert
               type="error"
@@ -219,30 +228,34 @@ export function HomePage() {
               }
             />
           )}
-          {summary.isSuccess && (
-            <Row gutter={[16, 16]}>
-              <Col xs={12} md={6}>
-                <Statistic title="Total" value={summary.data.total} />
-              </Col>
-              <Col xs={12} md={6}>
-                <Statistic title="Abertas" value={summary.data.byStatus.OPEN} />
-              </Col>
-              <Col xs={12} md={6}>
-                <Statistic
-                  title="Em andamento"
-                  value={summary.data.byStatus.IN_PROGRESS}
-                />
-              </Col>
-              <Col xs={12} md={6}>
-                <Statistic
-                  title="Concluídas"
-                  value={summary.data.byStatus.COMPLETED}
-                />
-              </Col>
-            </Row>
-          )}
-        </Card>
-        <Card title="Solicitações" className="requests-card">
+          <div className="summary-grid">
+            <Card className="summary-card total" loading={summary.isPending}>
+              <Statistic title="Total" value={summary.data?.total ?? 0} />
+            </Card>
+            <Card className="summary-card open" loading={summary.isPending}>
+              <Statistic
+                title="Abertas"
+                value={summary.data?.byStatus.OPEN ?? 0}
+              />
+            </Card>
+            <Card className="summary-card progress" loading={summary.isPending}>
+              <Statistic
+                title="Em andamento"
+                value={summary.data?.byStatus.IN_PROGRESS ?? 0}
+              />
+            </Card>
+            <Card
+              className="summary-card completed"
+              loading={summary.isPending}
+            >
+              <Statistic
+                title="Concluídas"
+                value={summary.data?.byStatus.COMPLETED ?? 0}
+              />
+            </Card>
+          </div>
+        </section>
+        <Card title="Todas as solicitações" className="requests-card">
           {categories.isError && (
             <Alert
               type="error"

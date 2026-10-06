@@ -30,19 +30,10 @@ body {
   margin-top: 24px;
 }
 
-.request-form-container {
-  display: flex;
-  width: 100%;
-}
-
 .content {
   width: min(100%, 960px);
   margin: 0 auto;
   padding: 56px 32px;
-}
-
-.content.compact {
-  width: min(100%, 720px);
 }
 
 @media (max-width: 600px) {
