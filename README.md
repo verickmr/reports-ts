@@ -114,6 +114,12 @@ Filtros opcionais em `GET /api/requests`: `title` (busca parcial sem diferenciar
 
 `GET /api/requests/summary` exige sessão ativa e retorna o total de solicitações e a contagem por status (`OPEN`, `IN_PROGRESS`, `COMPLETED`), incluindo zeros quando não há registros.
 
+### Quadro experimental
+
+Na branch `feat/kanban-solicitacoes`, a tela principal oferece **Lista** e **Quadro**. O quadro agrupa solicitações nas três etapas e permite arrastar um cartão para outra coluna; a mudança usa o mesmo endpoint `PATCH /api/requests/:id/status` do editor de detalhes. A atualização aparece imediatamente e volta ao estado anterior se a API falhar. O editor de status nos detalhes continua disponível para quem usa teclado ou prefere uma ação explícita.
+
+Arrastar dentro da mesma coluna não altera a ordem: o banco mantém a ordenação por data de abertura. O quadro usa a listagem sem paginação, adequada para avaliar a interação com poucos registros; para uma operação com muitos chamados, seria necessário paginar ou carregar cada coluna sob demanda.
+
 ## Build e deploy de avaliação
 
 No servidor, instale as dependências, configure PostgreSQL e `apps/api/.env` como acima e aplique as migrations. O build gera `apps/api/dist` e `apps/web/dist`:
