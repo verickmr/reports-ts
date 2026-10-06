@@ -162,7 +162,9 @@ Abra `https://portal.example.com` e entre com um usuário criado pelo seed. Mant
 
 ### Deploy de demonstração na Vercel
 
-O `vercel.json` define dois serviços no mesmo projeto: Vite em `/` e NestJS em `/api/`. Os caminhos de API continuam na mesma origem da interface, inclusive para cookies e retorno do Google. A configuração de Services está em beta na Vercel.
+**Aplicação publicada:** https://reports-ts.vercel.app · **API:** https://reports-ts.vercel.app/api/health
+
+O `vercel.json` define dois serviços no mesmo projeto: Vite em `/` e API NestJS em `/api/`. A API é empacotada pelo `Dockerfile.vercel` como container. Os caminhos de API continuam na mesma origem da interface, inclusive para cookies e retorno do Google. A configuração de Services está em beta na Vercel.
 
 1. Envie este commit ao GitHub. Na Vercel, importe `verickmr/reports-ts` como um projeto com **Root Directory** na raiz do repositório e branch `main`. Mantenha o framework e os comandos de build definidos em `vercel.json`. Configure `ENABLE_EXPERIMENTAL_COREPACK=1` para respeitar o `pnpm@11.25.0` fixado no `package.json`.
 2. Adicione PostgreSQL ao projeto pela integração Neon da Vercel e confira se a variável `DATABASE_URL` foi disponibilizada. Escolha uma região próxima à região das funções. Crie `DEMO_REQUESTER_PASSWORD` e `DEMO_AGENT_PASSWORD` como variáveis de ambiente da Vercel, com senhas próprias. Não copie as senhas para o repositório.
