@@ -2,6 +2,15 @@
 
 Mini-projeto full stack desenvolvido em etapas. O monorepositório contém interface React, API NestJS, contratos Zod compartilhados, PostgreSQL e autenticação por sessão.
 
+## Entrega e demonstração
+
+- [Código-fonte no GitHub](https://github.com/verickmr/reports-ts), na branch `main`.
+- [Aplicação pública](https://reports-ts.vercel.app) e [estado da API](https://reports-ts.vercel.app/api/health).
+- [Memorial Técnico de Desenvolvimento](docs/memorial-tecnico-de-desenvolvimento.md), [dicionário de dados](docs/data-dictionary.md) e [migration SQL inicial](apps/api/prisma/migrations/20260929160000_initial/migration.sql).
+- [Quadro experimental](https://github.com/verickmr/reports-ts/tree/feat/kanban-solicitacoes) na branch `feat/kanban-solicitacoes`. O [Preview da Vercel](https://reports-ts-git-feat-kanban-solicitacoes-verickmrs-projects.vercel.app) exige autenticação na conta Vercel do projeto; avaliadores externos devem usar a aplicação pública.
+
+As credenciais locais de demonstração estão na seção [Acesso de demonstração](#acesso-de-demonstração). A senha do deploy público é diferente da senha de exemplo e deve ser compartilhada diretamente com o avaliador.
+
 ## Pré-requisitos
 
 - Node.js 22.12 ou superior e pnpm 11.25.0. Caso o pnpm não esteja instalado, instale-o com `npm install --global pnpm@11.25.0` e confirme com `pnpm --version`.
@@ -116,7 +125,7 @@ Filtros opcionais em `GET /api/requests`: `title` (busca parcial sem diferenciar
 
 ### Quadro experimental
 
-Na branch `feat/kanban-solicitacoes`, a tela principal oferece **Lista** e **Quadro**. O quadro agrupa solicitações nas três etapas e permite arrastar um cartão para outra coluna; a mudança usa o mesmo endpoint `PATCH /api/requests/:id/status` do editor de detalhes. A atualização aparece imediatamente e volta ao estado anterior se a API falhar. O editor de status nos detalhes continua disponível para quem usa teclado ou prefere uma ação explícita.
+Na branch `feat/kanban-solicitacoes`, a tela principal oferece **Lista** e **Quadro**. O quadro agrupa solicitações nas três etapas. Arraste pelo corpo do cartão, fora do título que abre os detalhes, e solte em outra coluna. A mudança usa o mesmo endpoint `PATCH /api/requests/:id/status` do editor de detalhes. A atualização aparece imediatamente e volta ao estado anterior se a API falhar. O editor de status nos detalhes continua disponível para quem usa teclado ou prefere uma ação explícita.
 
 Arrastar dentro da mesma coluna não altera a ordem: o banco mantém a ordenação por data de abertura. O quadro usa a listagem sem paginação, adequada para avaliar a interação com poucos registros; para uma operação com muitos chamados, seria necessário paginar ou carregar cada coluna sob demanda.
 
@@ -168,11 +177,11 @@ Abra `https://portal.example.com` e entre com um usuário criado pelo seed. Mant
 
 ### Deploy de demonstração na Vercel
 
-**Aplicação publicada:** https://reports-ts.vercel.app · **API:** https://reports-ts.vercel.app/api/health
+**Aplicação pública (`main`):** https://reports-ts.vercel.app · **API:** https://reports-ts.vercel.app/api/health. O Preview do quadro está vinculado à branch experimental e exige acesso à conta Vercel; seu endereço está na seção [Entrega e demonstração](#entrega-e-demonstração).
 
 O `vercel.json` define dois serviços no mesmo projeto: Vite em `/` e API NestJS em `/api/`. A API é empacotada pelo `Dockerfile.vercel` como container. Os caminhos de API continuam na mesma origem da interface, inclusive para cookies e retorno do Google. A configuração de Services está em beta na Vercel.
 
-1. Envie este commit ao GitHub. Na Vercel, importe `verickmr/reports-ts` como um projeto com **Root Directory** na raiz do repositório e branch `main`. Mantenha o framework e os comandos de build definidos em `vercel.json`. Configure `ENABLE_EXPERIMENTAL_COREPACK=1` para respeitar o `pnpm@11.25.0` fixado no `package.json`.
+1. Para reproduzir o deploy, importe `verickmr/reports-ts` na Vercel como um projeto com **Root Directory** na raiz do repositório e branch `main`. Mantenha o framework e os comandos de build definidos em `vercel.json`. Configure `ENABLE_EXPERIMENTAL_COREPACK=1` para respeitar o `pnpm@11.25.0` fixado no `package.json`.
 2. Adicione PostgreSQL ao projeto pela integração Neon da Vercel e confira se a variável `DATABASE_URL` foi disponibilizada. Escolha uma região próxima à região das funções. Crie `DEMO_REQUESTER_PASSWORD` e `DEMO_AGENT_PASSWORD` como variáveis de ambiente da Vercel, com senhas próprias. Não copie as senhas para o repositório.
 3. Antes de testar a aplicação, aplique as migrations e rode o seed uma única vez contra esse banco. Em um terminal local, coloque a URL do banco no arquivo ignorado `apps/api/.env` com as duas senhas de demonstração e execute:
 
@@ -201,7 +210,7 @@ pnpm --filter @portal/api db:status
 
 Para verificar o fluxo HTTP, inicie a API com um **banco local descartável** já migrado e populado pelo seed e execute `pnpm --filter @portal/api test:integration` em outro terminal. O teste de solicitações usa `solicitante` e a senha `DEMO_REQUESTER_PASSWORD` de `apps/api/.env`, cria uma solicitação temporária e tenta removê-la ao final. Se necessário, defina `API_TEST_BASE_URL` (padrão `http://127.0.0.1:3000/api`), `API_TEST_USERNAME` e `API_TEST_PASSWORD` no ambiente do comando. A mesma suíte inicia uma instância isolada da API para testar o login Google por HTTP com o provedor simulado, sem credenciais externas. Esses testes não entram no `pnpm test` geral porque exigem um banco em execução.
 
-O workflow [CI](.github/workflows/ci.yml) executa esses checks em push e pull request com PostgreSQL temporário e sem credenciais externas. Ele passa a funcionar quando este repositório for publicado no GitHub.
+O workflow [CI](.github/workflows/ci.yml) executa esses checks em push e pull request com PostgreSQL temporário e sem credenciais externas. A [execução da branch experimental](https://github.com/verickmr/reports-ts/actions/runs/37431720156) concluiu com sucesso, incluindo os testes HTTP de integração.
 
 ## Estrutura
 
