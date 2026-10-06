@@ -45,7 +45,7 @@ pnpm --filter @portal/api db:migrate:deploy
 pnpm --filter @portal/api db:seed
 ```
 
-O seed é repetível e não pode ser executado com `NODE_ENV=production`. Para iniciar API e interface juntas, rode:
+O seed é repetível. Em produção, ele exige a confirmação explícita `SEED_DEMO_ACCOUNTS=true`. Para iniciar API e interface juntas, rode:
 
 ```powershell
 pnpm dev
@@ -159,6 +159,23 @@ server {
 ```
 
 Abra `https://portal.example.com` e entre com um usuário criado pelo seed. Mantenha a porta `3000` restrita ao proxy. O cookie de sessão recebe `Secure` quando a API roda com `NODE_ENV=production`, portanto o acesso pelo navegador precisa ser HTTPS. O Compose incluído no repositório executa apenas o PostgreSQL; a API e o servidor estático precisam ser mantidos pelo gerenciador de processos do ambiente escolhido. O login Google permanece opcional e exige as credenciais e o URI de retorno descritos acima.
+
+### Deploy de demonstração na Vercel
+
+O `vercel.json` define dois serviços no mesmo projeto: Vite em `/` e NestJS em `/api/`. Os caminhos de API continuam na mesma origem da interface, inclusive para cookies e retorno do Google. A configuração de Services está em beta na Vercel.
+
+1. Envie este commit ao GitHub. Na Vercel, importe `verickmr/reports-ts` como um projeto com **Root Directory** na raiz do repositório e branch `main`. Mantenha o framework e os comandos de build definidos em `vercel.json`. Configure `ENABLE_EXPERIMENTAL_COREPACK=1` para respeitar o `pnpm@11.25.0` fixado no `package.json`.
+2. Adicione PostgreSQL ao projeto pela integração Neon da Vercel e confira se a variável `DATABASE_URL` foi disponibilizada. Escolha uma região próxima à região das funções. Crie `DEMO_REQUESTER_PASSWORD` e `DEMO_AGENT_PASSWORD` como variáveis de ambiente da Vercel, com senhas próprias. Não copie as senhas para o repositório.
+3. Antes de testar a aplicação, aplique as migrations e rode o seed uma única vez contra esse banco. Em um terminal local, coloque a URL do banco no arquivo ignorado `apps/api/.env` com as duas senhas de demonstração e execute:
+
+   ```powershell
+   pnpm --filter @portal/api db:migrate:deploy
+   pnpm --filter @portal/api db:seed
+   ```
+
+   O seed cria as categorias e os usuários `solicitante` e `atendente`. Para repetir esse seed com `NODE_ENV=production`, defina também `SEED_DEMO_ACCOUNTS=true` apenas durante o comando. Use um banco exclusivo para esta demonstração. As migrations não são executadas a cada requisição da função.
+
+4. Após o deploy, acesse a URL fornecida pela Vercel e confira `/api/health`, login, criação de solicitação e logout. Abra diretamente `/login` para conferir o fallback da SPA. Só inclua a URL na candidatura depois desses testes. Caso ative o login Google, registre `https://<dominio-vercel>/api/auth/google/callback` no Google Cloud e configure as três variáveis `GOOGLE_*` na Vercel.
 
 ## Verificações
 

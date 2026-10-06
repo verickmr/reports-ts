@@ -12,9 +12,12 @@ const categories = [
 ] as const;
 
 async function main(): Promise<void> {
-  if (process.env.NODE_ENV === 'production') {
+  if (
+    process.env.NODE_ENV === 'production' &&
+    process.env.SEED_DEMO_ACCOUNTS !== 'true'
+  ) {
     throw new Error(
-      'O seed de demonstração não pode ser executado em produção.',
+      'O seed de demonstração em produção exige SEED_DEMO_ACCOUNTS=true.',
     );
   }
 
