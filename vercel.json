@@ -9,9 +9,9 @@
       "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
     },
     "api": {
-      "root": "apps/api/",
-      "framework": "nestjs",
-      "buildCommand": "pnpm --filter @portal/contracts build && pnpm build"
+      "root": "./",
+      "runtime": "container",
+      "entrypoint": "Dockerfile.vercel"
     }
   },
   "rewrites": [
