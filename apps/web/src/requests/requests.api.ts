@@ -1,6 +1,8 @@
 import {
   createdRequestSchema,
   createRequestInputSchema,
+  listedRequestsSchema,
+  listRequestsQuerySchema,
   paginatedListRequestsQuerySchema,
   paginatedRequestsSchema,
   requestDetailSchema,
@@ -9,6 +11,8 @@ import {
   updateRequestInputSchema,
   type CreatedRequest,
   type CreateRequestInput,
+  type ListedRequests,
+  type ListRequestsQuery,
   type PaginatedListRequestsQuery,
   type PaginatedRequests,
   type RequestDetail,
@@ -130,6 +134,25 @@ export async function listRequests(
     throw new Error('Não foi possível carregar as solicitações.');
   }
   return paginatedRequestsSchema.parse(await response.json());
+}
+
+export async function listAllRequests(
+  filters: ListRequestsQuery,
+): Promise<ListedRequests> {
+  const query = listRequestsQuerySchema.parse(filters);
+  const params = new URLSearchParams();
+  for (const [name, value] of Object.entries(query)) {
+    if (value !== undefined) params.set(name, String(value));
+  }
+  const search = params.toString();
+  const response = await fetch(`/api/requests${search ? `?${search}` : ''}`);
+  if (response.status === 401) {
+    throw new Error('Sua sessão expirou. Atualize a página e entre novamente.');
+  }
+  if (!response.ok) {
+    throw new Error('Não foi possível carregar o quadro de solicitações.');
+  }
+  return listedRequestsSchema.parse(await response.json());
 }
 
 export async function createRequest(

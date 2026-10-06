@@ -10,6 +10,7 @@
     "lint": "eslint src"
   },
   "dependencies": {
+    "@hello-pangea/dnd": "18.0.1",
     "@portal/contracts": "workspace:*",
     "@tanstack/react-query": "5.104.0",
     "antd": "6.6.5",

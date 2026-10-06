@@ -8,6 +8,7 @@ import {
   Input,
   Layout,
   Row,
+  Segmented,
   Select,
   Space,
   Statistic,
@@ -34,6 +35,7 @@ import {
 import { getRequestSummary, listRequests } from '../requests/requests.api';
 import { statusColors, statusLabels } from '../requests/request-status';
 import { CreateRequestModal } from '../requests/create-request-modal';
+import { RequestBoard } from '../requests/request-board';
 import { useThemePreference } from '../state/theme-preference';
 
 type ListedRequest = ListedRequests[number];
@@ -88,6 +90,7 @@ export function HomePage() {
   const [filters, setFilters] = useState<ListRequestsQuery>({});
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [view, setView] = useState<'list' | 'board'>('list');
   const [createOpen, setCreateOpen] = useState(false);
   const [createdRequestId, setCreatedRequestId] = useState<number | null>(null);
   const mode = useThemePreference((state) => state.mode);
@@ -107,6 +110,7 @@ export function HomePage() {
     queryFn: () => listRequests({ ...filters, page, pageSize }),
     placeholderData: keepPreviousData,
     retry: false,
+    enabled: view === 'list',
   });
   const summary = useQuery({
     queryKey: ['requests', 'summary'],
@@ -255,7 +259,28 @@ export function HomePage() {
             </Card>
           </div>
         </section>
-        <Card title="Todas as solicitações" className="requests-card">
+        <Card
+          title="Todas as solicitações"
+          className="requests-card"
+          extra={
+            <Segmented
+              aria-label="Visualização das solicitações"
+              value={view}
+              options={[
+                { label: 'Lista', value: 'list' },
+                { label: 'Quadro', value: 'board' },
+              ]}
+              onChange={(value) => {
+                const nextView = value === 'board' ? 'board' : 'list';
+                if (nextView === 'board') {
+                  filterForm.setFieldValue('status', undefined);
+                  setFilters((current) => ({ ...current, status: undefined }));
+                }
+                setView(nextView);
+              }}
+            />
+          }
+        >
           {categories.isError && (
             <Alert
               type="error"
@@ -294,20 +319,19 @@ export function HomePage() {
                   />
                 </Form.Item>
               </Col>
-              <Col xs={24} md={8}>
-                <Form.Item label="Status" name="status">
-                  <Select
-                    allowClear
-                    placeholder="Todos"
-                    options={Object.entries(statusLabels).map(
-                      ([value, label]) => ({
-                        value,
-                        label,
-                      }),
-                    )}
-                  />
-                </Form.Item>
-              </Col>
+              {view === 'list' && (
+                <Col xs={24} md={8}>
+                  <Form.Item label="Status" name="status">
+                    <Select
+                      allowClear
+                      placeholder="Todos"
+                      options={Object.entries(statusLabels).map(
+                        ([value, label]) => ({ value, label }),
+                      )}
+                    />
+                  </Form.Item>
+                </Col>
+              )}
               <Col xs={24} md={8}>
                 <Form.Item label="Abertura de" name="fromDate">
                   <Input type="date" />
@@ -338,7 +362,9 @@ export function HomePage() {
               </Col>
             </Row>
           </Form>
-          {requests.isError ? (
+          {view === 'board' ? (
+            <RequestBoard filters={filters} />
+          ) : requests.isError ? (
             <Alert
               type="error"
               showIcon
