@@ -23,13 +23,9 @@ import {
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query';
-import {
-  healthResponseSchema,
-  type ListedRequests,
-  type ListRequestsQuery,
-} from '@portal/contracts';
+import { type ListedRequests, type ListRequestsQuery } from '@portal/contracts';
 import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { logout, sessionQueryKey } from '../auth/auth.api';
 import { useSession } from '../auth/use-session';
 import {
@@ -38,6 +34,7 @@ import {
 } from '../categories/categories.api';
 import { getRequestSummary, listRequests } from '../requests/requests.api';
 import { statusColors, statusLabels } from '../requests/request-status';
+import { CreateRequestModal } from '../requests/create-request-modal';
 import { useViewPreferences } from '../state/view-preferences';
 
 type ListedRequest = ListedRequests[number];
@@ -87,18 +84,13 @@ const columns: TableColumnsType<ListedRequest> = [
   },
 ];
 
-async function fetchHealth() {
-  const response = await fetch('/api/health');
-  if (!response.ok) throw new Error('A API não respondeu corretamente.');
-  return healthResponseSchema.parse(await response.json());
-}
-
 export function HomePage() {
   const [filterForm] = Form.useForm<RequestFilterForm>();
   const [filters, setFilters] = useState<ListRequestsQuery>({});
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const navigate = useNavigate();
+  const [createOpen, setCreateOpen] = useState(false);
+  const [createdRequestId, setCreatedRequestId] = useState<number | null>(null);
   const compact = useViewPreferences((state) => state.compact);
   const setCompact = useViewPreferences((state) => state.setCompact);
   const queryClient = useQueryClient();
@@ -106,11 +98,6 @@ export function HomePage() {
   const signOut = useMutation({
     mutationFn: logout,
     onSuccess: () => queryClient.setQueryData(sessionQueryKey, null),
-  });
-  const health = useQuery({
-    queryKey: ['health'],
-    queryFn: fetchHealth,
-    retry: false,
   });
   const categories = useQuery({
     queryKey: categoriesQueryKey,
@@ -175,7 +162,7 @@ export function HomePage() {
             </Typography.Text>
           </div>
           <Space>
-            <Button type="primary" onClick={() => navigate('/requests/new')}>
+            <Button type="primary" onClick={() => setCreateOpen(true)}>
               Nova solicitação
             </Button>
             <Typography.Text>Visualização compacta</Typography.Text>
@@ -198,6 +185,21 @@ export function HomePage() {
             showIcon
             message={signOut.error.message}
             className="form-alert"
+          />
+        )}
+        {createdRequestId !== null && (
+          <Alert
+            type="success"
+            showIcon
+            closable
+            onClose={() => setCreatedRequestId(null)}
+            message={`Solicitação #${createdRequestId} criada com sucesso.`}
+            description={
+              <Link to={`/requests/${createdRequestId}`}>
+                Ver solicitação
+              </Link>
+            }
+            className="requests-card"
           />
         )}
         <Card
@@ -356,34 +358,16 @@ export function HomePage() {
             />
           )}
         </Card>
-        <Card
-          title="Conexão com a API"
-          loading={health.isPending}
-          className="status-card"
-        >
-          {health.isSuccess && (
-            <Alert
-              type="success"
-              showIcon
-              message="Frontend e API conectados"
-              description="O contrato compartilhado foi validado com Zod."
-            />
-          )}
-          {health.isError && (
-            <Alert
-              type="error"
-              showIcon
-              message="Não foi possível consultar a API"
-              description={health.error.message}
-              action={
-                <Button onClick={() => void health.refetch()}>
-                  Tentar novamente
-                </Button>
-              }
-            />
-          )}
-        </Card>
       </Layout.Content>
+      {createOpen && (
+        <CreateRequestModal
+          onClose={() => setCreateOpen(false)}
+          onCreated={(id) => {
+            setCreatedRequestId(id);
+            setCreateOpen(false);
+          }}
+        />
+      )}
     </Layout>
   );
 }
