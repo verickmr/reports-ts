@@ -9,3 +9,5 @@ coverage/
 *.log
 apps/api/src/generated/
 
+.vercel/
+.npm-cache/
