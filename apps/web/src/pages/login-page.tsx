@@ -18,15 +18,13 @@ import {
   sessionQueryKey,
 } from '../auth/auth.api';
 import { useSession } from '../auth/use-session';
-import { useThemePreference } from '../state/theme-preference';
+import { ThemeToggle } from '../state/theme-toggle';
 
 export function LoginPage() {
   const session = useSession();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const mode = useThemePreference((state) => state.mode);
-  const toggleMode = useThemePreference((state) => state.toggleMode);
   const googleResult = searchParams.get('google');
   const googleAvailability = useQuery({
     queryKey: googleAvailabilityQueryKey,
@@ -55,22 +53,14 @@ export function LoginPage() {
               </span>
               <span>Solicitações</span>
             </div>
-            <Button
-              ghost
-              onClick={toggleMode}
-              aria-label={
-                mode === 'dark' ? 'Ativar modo claro' : 'Ativar modo escuro'
-              }
-            >
-              {mode === 'dark' ? 'Claro' : 'Escuro'}
-            </Button>
+            <ThemeToggle inverse />
           </div>
           <div>
             <span className="login-eyebrow">PORTAL INTERNO</span>
             <Typography.Title level={1}>
               Tudo em um só lugar, do pedido à solução.
             </Typography.Title>
-            <Typography.Paragraph>
+            <Typography.Paragraph className="login-description">
               Registre demandas e acompanhe cada etapa com clareza.
             </Typography.Paragraph>
           </div>

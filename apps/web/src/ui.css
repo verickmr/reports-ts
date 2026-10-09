@@ -66,6 +66,47 @@ body {
   font-size: 13px;
 }
 
+.theme-toggle {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid #c9d5ec;
+  border-radius: 999px;
+  background: #f5f8fe;
+  color: #25437d;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+  transition:
+    background 150ms,
+    border-color 150ms;
+}
+
+.theme-toggle:hover {
+  border-color: #9db4e4;
+  background: #eaf0fc;
+}
+
+.theme-toggle:focus-visible {
+  outline: 3px solid #84a6f5;
+  outline-offset: 2px;
+}
+
+.theme-toggle svg {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
 .page-heading {
   display: flex;
   align-items: center;
@@ -223,14 +264,20 @@ body {
   gap: 12px;
 }
 
-.login-topline .ant-btn {
+.theme-toggle-inverse {
+  border-color: #91a8d6;
+  background: rgb(255 255 255 / 10%);
   color: #fff;
-  border-color: #8096c4;
+}
+
+.theme-toggle-inverse:hover {
+  border-color: #d6e2fb;
+  background: rgb(255 255 255 / 20%);
 }
 
 .brand-light,
 .login-intro h1.ant-typography,
-.login-intro p.ant-typography {
+.login-intro .login-description.ant-typography {
   color: #fff;
 }
 
@@ -253,12 +300,12 @@ body {
   letter-spacing: -0.05em;
 }
 
-.login-intro p.ant-typography {
-  max-width: 320px;
+.login-intro .login-description.ant-typography {
+  max-width: 360px;
   margin: 0;
-  color: #d7e1f5;
+  color: #e0e9fa;
   font-size: 15px;
-  line-height: 1.65;
+  line-height: 1.6;
 }
 
 .login-footnote {
@@ -307,6 +354,15 @@ body {
 :root[data-theme='dark'] .site-header {
   background: #162236;
   border-bottom-color: #2d3a51;
+}
+:root[data-theme='dark'] .site-header .theme-toggle {
+  border-color: #445879;
+  background: #22334e;
+  color: #e0e9fa;
+}
+:root[data-theme='dark'] .site-header .theme-toggle:hover {
+  border-color: #7997d0;
+  background: #2a4063;
 }
 :root[data-theme='dark'] .brand,
 :root[data-theme='dark'] .summary-card .ant-statistic-content {
@@ -405,5 +461,18 @@ body {
   .login-intro,
   .login-card .ant-card-body {
     padding: 28px;
+  }
+}
+
+@media (max-width: 420px) {
+  .site-header .theme-toggle,
+  .login-intro .theme-toggle {
+    width: 38px;
+    padding: 0;
+  }
+
+  .site-header .theme-toggle span,
+  .login-intro .theme-toggle span {
+    display: none;
   }
 }

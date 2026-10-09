@@ -34,7 +34,7 @@ import {
 import { getRequestSummary, listRequests } from '../requests/requests.api';
 import { statusColors, statusLabels } from '../requests/request-status';
 import { CreateRequestModal } from '../requests/create-request-modal';
-import { useThemePreference } from '../state/theme-preference';
+import { ThemeToggle } from '../state/theme-toggle';
 
 type ListedRequest = ListedRequests[number];
 type RequestFilterForm = {
@@ -90,8 +90,6 @@ export function HomePage() {
   const [pageSize, setPageSize] = useState(10);
   const [createOpen, setCreateOpen] = useState(false);
   const [createdRequestId, setCreatedRequestId] = useState<number | null>(null);
-  const mode = useThemePreference((state) => state.mode);
-  const toggleMode = useThemePreference((state) => state.toggleMode);
   const queryClient = useQueryClient();
   const session = useSession();
   const signOut = useMutation({
@@ -156,14 +154,7 @@ export function HomePage() {
           </div>
           <Flex align="center" gap="middle">
             <span className="user-name">{session.data?.user.name}</span>
-            <Button
-              onClick={toggleMode}
-              aria-label={
-                mode === 'dark' ? 'Ativar modo claro' : 'Ativar modo escuro'
-              }
-            >
-              {mode === 'dark' ? 'Modo claro' : 'Modo escuro'}
-            </Button>
+            <ThemeToggle />
             <Button
               onClick={() => signOut.mutate()}
               loading={signOut.isPending}
